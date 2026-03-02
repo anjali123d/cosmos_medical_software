@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 })
 app.use("/api/items", require("./routes/itemRoutes"));
 app.use("/api/patients", require("./routes/patientRoutes"));
-app.use("/api/issues", require("./routes/issueRoutes"));    
+app.use("/api/issues", require("./routes/issueRoutes"));
 app.use("/api/returns", require("./routes/returnRoutes"));
 
 const PORT = 5000;
