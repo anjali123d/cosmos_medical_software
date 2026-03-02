@@ -1,54 +1,40 @@
 import { useEffect, useState } from "react";
 import API from "../api";
+import { RefreshCcw, AlertCircle, CheckCircle } from 'react-feather';
 import "./ReturnItem.css";
 
 const ReturnItem = () => {
     const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const [form, setForm] = useState({
         issueId: "",
         damageCharge: 0
     });
 
-    const [refund, setRefund] = useState(null);
-
-    const selectedIssue = issues.find(i => i._id === form.issueId);
     const fetchIssues = async () => {
         try {
-            // ✅ fetch only NOT returned issues
+            // Fetch only NOT returned issues
             const res = await API.get("/issues/active");
             setIssues(res.data);
         } catch {
-            setError("Failed to load issued items");
+            setError("Failed to load active issued items");
         }
     };
-    useEffect(() => {
 
+    useEffect(() => {
         fetchIssues();
     }, []);
-    const handleCalculate = () => {
-        if (!selectedIssue) {
-            setError("Please select an issue");
-            return;
-        }
 
-        if (form.damageCharge < 0) {
-            setError("Damage charge cannot be negative");
-            return;
-        }
-
-        const calculatedRefund =
-            selectedIssue.totalDeposit - Number(form.damageCharge);
-
-        setRefund(calculatedRefund < 0 ? 0 : calculatedRefund);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setError("");
-    };
+        setSuccess("");
 
-    const handleSubmit = async () => {
-        if (!selectedIssue) {
-            setError("Select issue before confirming return");
+        if (!form.issueId) {
+            setError("Please select an issued item to return");
             return;
         }
 
@@ -59,71 +45,62 @@ const ReturnItem = () => {
                 damageCharge: Number(form.damageCharge)
             });
 
-            alert("✅ Item Returned Successfully");
+            setSuccess("✅ Item Returned Successfully");
             fetchIssues();
             setForm({ issueId: "", damageCharge: 0 });
-            setRefund(null);
-        } catch {
-            setError("Return failed");
+
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            setError(err.response?.data?.message || "Return process failed");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="page">
+        <div className="return-container">
+            <header className="page-header">
+                <h1>Item Return</h1>
+
+            </header>
+
             <div className="card">
                 <h2>Return Medical Item</h2>
 
-                {error && <p className="error">{error}</p>}
+                <form onSubmit={handleSubmit}>
+                    {error && <div className="alert error-alert"><AlertCircle size={16} /> {error}</div>}
+                    {success && <div className="alert success-alert"><CheckCircle size={16} /> {success}</div>}
 
-                <select
-                    value={form.issueId}
-                    onChange={(e) => {
-                        setForm({ ...form, issueId: e.target.value });
-                        setRefund(null);
-                    }}
-                >
-                    <option value="">Select Issued Item</option>
-                    {issues.map(issue => (
-                        <option key={issue._id} value={issue._id}>
-                            {issue.patient?.patientName} - {issue.item?.itemName} (Qty: {issue.qty})
-                        </option>
-                    ))}
-                </select>
-
-                {selectedIssue && (
-                    <div className="info-box">
-                        <p><strong>Patient:</strong> {selectedIssue.patient?.patientName}</p>
-                        <p><strong>Item:</strong> {selectedIssue.item?.itemName}</p>
-                        <p><strong>Quantity:</strong> {selectedIssue.qty}</p>
-                        <p><strong>Total Deposit:</strong> ₹{selectedIssue.totalDeposit}</p>
+                    <div className="input-field">
+                        <label>Select Issued Item</label>
+                        <select
+                            value={form.issueId}
+                            onChange={(e) => setForm({ ...form, issueId: e.target.value })}
+                        >
+                            <option value="">Select...</option>
+                            {issues.map(issue => (
+                                <option key={issue._id} value={issue._id}>
+                                    {issue.patient?.patientName} - {issue.item?.itemName} (Qty: {issue.qty})
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                )}
 
-                <input
-                    type="number"
-                    min="0"
-                    placeholder="Damage Charge"
-                    value={form.damageCharge}
-                    onChange={(e) =>
-                        setForm({ ...form, damageCharge: e.target.value })
-                    }
-                />
-
-                <button className="secondary" onClick={handleCalculate}>
-                    Calculate Refund
-                </button>
-
-                {refund !== null && (
-                    <div className="refund-box">
-                        <h4>Refund Amount: ₹{refund}</h4>
+                    <div className="input-field">
+                        <label>Damage / Deduction Charge (₹)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={form.damageCharge}
+                            onChange={(e) => setForm({ ...form, damageCharge: e.target.value })}
+                        />
                     </div>
-                )}
 
-                <button onClick={handleSubmit} disabled={loading}>
-                    {loading ? "Processing..." : "Confirm Return"}
-                </button>
+                    <button type="submit" className="submit-btn" disabled={loading}>
+                        {loading ? "Processing..." : "Confirm Return"}
+                    </button>
+                </form>
             </div>
         </div>
     );

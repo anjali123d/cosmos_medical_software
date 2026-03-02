@@ -1,35 +1,22 @@
-import { NavLink } from "react-router-dom";
-import { FaHome, FaBoxOpen, FaUserPlus, FaExchangeAlt, FaUndo } from "react-icons/fa";
+import React from "react";
+import { Menu, Search, Bell } from "react-feather";
+import "./Navbar.css";
 
-
-const Navbar = () => {
+const Navbar = ({ toggleSidebar }) => {
     return (
-        <nav className="bottom-nav">
-            <NavLink to="/" className="nav-item">
-                <FaHome />
-                <span>Home</span>
-            </NavLink>
+        <header className="navbar">
+            {/* Left Section */}
+            <div className="navbar-left">
+                <button className="menu-btn" onClick={toggleSidebar}>
+                    <Menu size={22} />
+                </button>
 
-            <NavLink to="/add-item" className="nav-item">
-                <FaBoxOpen />
-                <span>Item</span>
-            </NavLink>
+                <h2 className="navbar-title">Medical Stock Dashboard</h2>
+            </div>
 
-            <NavLink to="/add-patient" className="nav-item">
-                <FaUserPlus />
-                <span>Patient</span>
-            </NavLink>
+            
 
-            <NavLink to="/issue" className="nav-item">
-                <FaExchangeAlt />
-                <span>Issue</span>
-            </NavLink>
-
-            <NavLink to="/return" className="nav-item">
-                <FaUndo />
-                <span>Return</span>
-            </NavLink>
-        </nav>
+        </header>
     );
 };
 

@@ -47,19 +47,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                         </div>
                     </nav>
 
-                    {/* Footer Section */}
-                    <div className="sidebar-profile">
-                        <div className="profile-card">
-                            <div className="avatar-circle">AD</div>
-                            <div className="profile-details">
-                                <p className="user-name">Admin User</p>
-                                <p className="user-role">Medical Admin</p>
-                            </div>
-                            <button className="logout-btn" title="Logout">
-                                <FaSignOutAlt />
-                            </button>
-                        </div>
-                    </div>
+                  
                 </div>
             </aside>
         </>

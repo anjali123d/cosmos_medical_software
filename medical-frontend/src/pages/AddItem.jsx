@@ -107,9 +107,7 @@ const AddItem = () => {
             {/* Header Area */}
             <div className="page-header">
                 <div className="header-left">
-                    <button className="back-btn" onClick={() => navigate("/")}>
-                        <ArrowLeft size={18} />
-                    </button>
+                   
                     <div>
                         <h1>Inventory Management</h1>
                         <p>Add or update medical supplies and equipment</p>
@@ -136,7 +134,7 @@ const AddItem = () => {
                                 <label>Item Name</label>
                                 <input
                                     name="itemName"
-                                    placeholder="e.g. Oxygen Cylinder"
+                                    placeholder="Item Name"
                                     value={form.itemName}
                                     onChange={handleChange}
                                 />
@@ -158,7 +156,7 @@ const AddItem = () => {
                                     <input
                                         name="depositPerItem"
                                         type="number"
-                                        placeholder="500"
+                                        placeholder="0"
                                         value={form.depositPerItem}
                                         onChange={handleChange}
                                     />

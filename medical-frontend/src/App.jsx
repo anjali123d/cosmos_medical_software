@@ -5,29 +5,44 @@ import AddItem from "./pages/AddItem";
 import AddPatient from "./pages/AddPatient";
 import IssueItem from "./pages/IssueItem";
 import ReturnItem from "./pages/ReturnItem";
-import Sidebar from "./components/Sidebar"; // Renamed from Navbar for clarity
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";   // ✅ Add Navbar
 import "./App.css";
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   return (
     <Router>
       <div className="app-layout">
-        {/* The Sidebar stays fixed */}
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-        {/* The Main Content area scrolls independently */}
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+        />
+
+        {/* Main Content */}
         <div className="main-wrapper">
-          <Routes>
-            <Route path="/" element={<Dashboard toggleSidebar={toggleSidebar} />} />
-            <Route path="/add-item" element={<AddItem />} />
-            <Route path="/add-patient" element={<AddPatient />} />
-            <Route path="/issue" element={<IssueItem />} />
-            <Route path="/return" element={<ReturnItem />} />
-          </Routes>
+
+          {/* Navbar at top */}
+          <Navbar toggleSidebar={toggleSidebar} />
+
+          {/* Page Content */}
+          <div className="page-content">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/add-item" element={<AddItem />} />
+              <Route path="/add-patient" element={<AddPatient />} />
+              <Route path="/issue" element={<IssueItem />} />
+              <Route path="/return" element={<ReturnItem />} />
+            </Routes>
+          </div>
+
         </div>
       </div>
     </Router>

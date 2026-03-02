@@ -1,119 +1,181 @@
-.page {
-    padding: 20px;
-    padding-bottom: 90px;
-    display: flex;
-    justify-content: center;
+.return-container {
+    padding: 0rem;
+    max-width: 1200px;
+    margin: 0 0px;
 }
 
-.card {
-    width: 100%;
-    max-width: 420px;
-    background: #ffffff;
-    padding: 20px;
+.return-grid {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.settlement-box {
+    background: #fff;
+    border: 2px solid #e2e8f0;
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    background-image: linear-gradient(to bottom, #f8fafc, #fff);
 }
 
-.card h2 {
-    text-align: center;
-    margin-bottom: 16px;
-    color: #0d6efd;
+.settlement-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    color: #475569;
 }
 
-.card select,
-.card input {
+.deduction {
+    color: #e11d48;
+    font-weight: 600;
+}
+
+.settlement-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid #e2e8f0;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* HIGH HIGHLIGHT FOR REFUND */
+.refund-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #10b981;
+    /* Emerald Green */
+    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+}
+
+.confirm-btn {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 14px;
-}
-
-.card select:focus,
-.card input:focus {
-    outline: none;
-    border-color: #0d6efd;
-}
-
-.info-box {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 14px;
-    font-size: 13px;
-}
-
-.refund-box {
-    background: #e9f7ef;
-    color: #198754;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 14px;
-}
-
-.card button {
-    width: 100%;
-    padding: 12px;
-    background: #0d6efd;
-    color: #fff;
+    background: #1e293b;
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     transition: 0.3s;
 }
 
-.card button.secondary {
-    background: #6c757d;
-    margin-bottom: 10px;
+.confirm-btn:hover:not(:disabled) {
+    background: #0f172a;
+    transform: translateY(-2px);
 }
 
-.card button:hover {
-    background: #084298;
+.detail-card {
+    background: #f1f5f9;
+    padding: 2rem;
+    border-radius: 20px;
+    position: sticky;
+    top: 2rem;
 }
 
-.card button.secondary:hover {
-    background: #565e64;
+.detail-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
 }
 
-.card button:disabled {
-    background: #9bbcff;
-    cursor: not-allowed;
+.detail-row label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
 }
 
-.error {
-    background: #ffe6e6;
-    color: #cc0000;
-    padding: 8px;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    text-align: center;
-    font-size: 13px;
+.detail-row p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
 }
 
-.refund-box {
-    background: #e8fff1;
+.return-container {
+    padding: 0rem;
+    max-width: 800px;
+    margin: 0 0;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: #64748b;
+}
+
+.input-field {
+    margin-bottom: 1.5rem;
+}
+
+.input-field label {
+    display: block;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+select,
+input[type="number"] {
+    width: 100%;
     padding: 12px;
-    margin: 10px 0;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
-    text-align: center;
-    font-size: 16px;
-    color: green;
+    font-size: 1rem;
 }
 
-.info {
-    color: #555;
+.submit-btn {
+    width: 100%;
+    background: #3b82f6;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.refund-box {
-    background: #e8fff1;
-    padding: 10px;
+.submit-btn:disabled {
+    background: #94a3b8;
+}
+
+.alert {
+    padding: 12px;
     border-radius: 8px;
-    margin-top: 10px;
-    text-align: center;
-    color: green;
-    font-weight: bold;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-alert {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.success-alert {
+    background: #d1fae5;
+    color: #065f46;
 }

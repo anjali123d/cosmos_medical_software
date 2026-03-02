@@ -92,9 +92,7 @@ const AddPatient = () => {
         <div className="add-patient-container">
             <div className="page-header">
                 <div className="header-left">
-                    <button className="back-btn" onClick={() => navigate("/")}>
-                        <ArrowLeft size={18} />
-                    </button>
+                   
                     <div>
                         <h1>Patient Directory</h1>
                         <p>Manage medical patient registrations and records</p>
@@ -112,8 +110,6 @@ const AddPatient = () => {
                         </div>
 
                         <form onSubmit={handleSubmit}>
-                            {error && <div className="alert error"><AlertCircle size={18} /> {error}</div>}
-                            {success && <div className="alert success"><CheckCircle size={18} /> {success}</div>}
 
                             <div className="input-group">
                                 <label><User size={14} /> Full Name</label>
@@ -208,6 +204,9 @@ const AddPatient = () => {
                         </div>
                     </div>
                 </div>
+                {error && <div className="alert error"><AlertCircle size={18} /> {error}</div>}
+                {success && <div className="alert success"><CheckCircle size={18} /> {success}</div>}
+
             </div>
         </div>
     );
