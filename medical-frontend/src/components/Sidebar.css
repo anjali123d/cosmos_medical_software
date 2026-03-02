@@ -1,0 +1,188 @@
+/* Sidebar Container */
+.sidebar-container {
+    width: 260px;
+    height: 100vh;
+    background: #1e293b;
+    /* Deep Navy Professional background */
+    color: #f8fafc;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1001;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem 1rem;
+}
+
+/* Brand Section */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 0.5rem 2.5rem;
+}
+
+.brand-logo {
+    background: #4361ee;
+    padding: 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.brand-name small {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+/* Nav Groups */
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-group {
+    margin-bottom: 2rem;
+}
+
+.group-title {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    padding-left: 0.75rem;
+    letter-spacing: 1px;
+}
+
+/* Link Styling */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+}
+
+.sidebar-link.active {
+    background: #4361ee;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.link-icon {
+    font-size: 1.1rem;
+    display: flex;
+}
+
+/* Profile Section */
+.sidebar-profile {
+    padding-top: 1.5rem;
+    border-top: 1px solid #334155;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: #4361ee;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.logout-btn:hover {
+    color: #ef4444;
+}
+
+/* Mobile logic */
+.mobile-close-btn {
+    display: none;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+@media (max-width: 992px) {
+    .sidebar-container {
+        left: -260px;
+    }
+
+    .sidebar-container.open {
+        left: 0;
+    }
+
+    .mobile-close-btn {
+        display: block;
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: white;
+    }
+}

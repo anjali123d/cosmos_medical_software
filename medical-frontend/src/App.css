@@ -1,0 +1,47 @@
+:root {
+    --sidebar-width: 260px;
+    --bg-light: #f8fafc;
+    --transition-speed: 0.3s;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-light);
+}
+
+.main-wrapper {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    /* Push content to the right of sidebar */
+    min-height: 100vh;
+    transition: margin var(--transition-speed);
+}
+
+/* Responsive Logic */
+@media (max-width: 992px) {
+    .main-wrapper {
+        margin-left: 0;
+        /* Content takes full width on mobile */
+        padding-bottom: 20px;
+        /* Space for mobile users */
+    }
+}
+
+/* Global Scrollbar styling for a premium feel */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { FaHome, FaBoxOpen, FaUserPlus, FaExchangeAlt, FaUndo } from "react-icons/fa";
-import "./Navbar.css";
+
 
 const Navbar = () => {
     return (
