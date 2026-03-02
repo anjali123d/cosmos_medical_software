@@ -1,11 +1,21 @@
-/* Dashboard.css */
+/* ============================= */
+/* 🌍 GLOBAL LAYOUT */
+/* ============================= */
 .dashboard-container {
-    padding: 1.5rem;
-    background-color: #f8fafc;
     min-height: 100vh;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    padding: 2rem;
+    font-family: "Segoe UI", sans-serif;
 }
 
-/* Header */
+.main-content {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ============================= */
+/* 🔍 HEADER */
+/* ============================= */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -16,7 +26,7 @@
 }
 
 .dashboard-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     color: #0f172a;
 }
 
@@ -38,12 +48,14 @@
     font-size: 0.9rem;
 }
 
-/* Stats Grid */
+/* ============================= */
+/* 📊 STATS GRID */
+/* ============================= */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .stat-card {
@@ -54,119 +66,194 @@
     align-items: center;
     gap: 1rem;
     border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    transition: 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
 }
 
 .stat-icon-wrapper {
-    padding: 1rem;
+    padding: 12px;
     border-radius: 12px;
+    color: white;
 }
 
-/* Stat Colors */
-.stat-card.blue .stat-icon-wrapper {
-    background: #dbeafe;
-    color: #2563eb;
+/* Color Variants */
+.blue .stat-icon-wrapper {
+    background: #2563eb;
 }
 
-.stat-card.green .stat-icon-wrapper {
-    background: #d1fae5;
-    color: #059669;
+.green .stat-icon-wrapper {
+    background: #16a34a;
 }
 
-.stat-card.orange .stat-icon-wrapper {
-    background: #ffedd5;
-    color: #ea580c;
+.orange .stat-icon-wrapper {
+    background: #f97316;
 }
 
-.stat-card.purple .stat-icon-wrapper {
-    background: #ede9fe;
-    color: #7c3aed;
+.purple .stat-icon-wrapper {
+    background: #9333ea;
 }
 
 .stat-info p {
-    margin: 0;
+    font-size: 14px;
     color: #64748b;
-    font-size: 0.9rem;
+    margin: 0;
 }
 
 .stat-info h3 {
-    margin: 0;
-    font-size: 1.5rem;
+    font-size: 22px;
+    margin-top: 4px;
     color: #0f172a;
 }
 
-/* Table */
+/* ============================= */
+/* 📦 SECTION HEADER */
+/* ============================= */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.table-container {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    overflow-x: auto;
+.section-header h3 {
+    font-size: 20px;
 }
 
-.inventory-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.inventory-table th,
-.inventory-table td {
-    text-align: left;
-    padding: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.inventory-table th {
-    background: #f8fafc;
+.date-text {
     color: #64748b;
+    font-size: 14px;
+}
+
+/* ============================= */
+/* 🧾 INVENTORY GRID */
+/* ============================= */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ============================= */
+/* 🏷 INVENTORY CARD */
+/* ============================= */
+.inventory-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 18px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    transition: 0.3s ease;
+    border: solid 1px black;
+}
+
+.inventory-card:hover {
+    transform: translateY(-6px);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-icon {
+    background: #e0f2fe;
+    padding: 8px;
+    border-radius: 10px;
+    color: #2563eb;
+}
+
+.stock-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.stock-badge.normal {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.stock-badge.low {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.item-name {
+    margin: 1rem 0;
+    font-size: 18px;
     font-weight: 600;
 }
 
-/* Loader */
+.card-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.card-details p {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.card-details h3 {
+    margin-top: 4px;
+    font-size: 18px;
+}
+
+/* ============================= */
+/* ⏳ LOADER */
+/* ============================= */
 .loader-container {
     text-align: center;
-    padding: 3rem;
+    padding: 2rem;
 }
 
 .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3b82f6;
+    width: 35px;
+    height: 35px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #2563eb;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px;
+    animation: spin 0.8s linear infinite;
+    margin: auto;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
+    to {
         transform: rotate(360deg);
     }
 }
 
 /* ============================= */
-/* 📱 TABLET RESPONSIVE (992px) */
+/* 🚫 EMPTY & ERROR */
+/* ============================= */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.error-message {
+    margin-top: 1rem;
+    padding: 10px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+}
+
+/* ============================= */
+/* 📱 TABLET (992px) */
 /* ============================= */
 @media (max-width: 992px) {
 
     .dashboard-container {
-        padding: 1.25rem;
-    }
-
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        padding: 1.5rem;
     }
 
     .search-bar {
@@ -174,22 +261,14 @@
         max-width: 400px;
     }
 
-    .stat-card {
-        padding: 1.25rem;
-    }
-
-    .stat-info h3 {
-        font-size: 1.3rem;
-    }
-
-    .inventory-table th,
-    .inventory-table td {
-        padding: 0.9rem;
+    .card-details {
+        flex-direction: column;
+        gap: 0.8rem;
     }
 }
 
 /* ============================= */
-/* 📱 MOBILE RESPONSIVE (768px) */
+/* 📱 MOBILE (768px) */
 /* ============================= */
 @media (max-width: 768px) {
 
@@ -197,50 +276,26 @@
         padding: 1rem;
     }
 
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .dashboard-header h1 {
         font-size: 1.3rem;
     }
 
-    .search-bar {
-        width: 100%;
-        padding: 6px 12px;
-    }
-
-    .search-bar input {
-        font-size: 0.85rem;
-    }
-
-    /* Stats become 1 per row */
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
 
     .stat-card {
-        padding: 1rem;
-        border-radius: 14px;
+        padding: 1.2rem;
     }
 
-    .stat-icon-wrapper {
-        padding: 0.8rem;
-    }
-
-    .stat-info h3 {
-        font-size: 1.2rem;
-    }
-
-    .stat-info p {
-        font-size: 0.85rem;
-    }
-
-    /* Table font smaller */
-    .inventory-table {
-        font-size: 0.85rem;
-    }
-
-    .inventory-table th,
-    .inventory-table td {
-        padding: 0.75rem;
+    .inventory-grid {
+        grid-template-columns: 1fr;
     }
 
     .section-header {
@@ -250,58 +305,33 @@
     }
 }
 
-/* ================================= */
-/* 📱 SMALL MOBILE (480px and below) */
-/* ================================= */
+/* ============================= */
+/* 📱 SMALL MOBILE (480px) */
+/* ============================= */
 @media (max-width: 480px) {
 
     .dashboard-container {
         padding: 0.8rem;
     }
 
-    .dashboard-header h1 {
-        font-size: 1.1rem;
-    }
-
     .search-bar {
-        padding: 6px 10px;
-        border-radius: 10px;
-    }
-
-    .search-bar input {
-        font-size: 0.8rem;
+        padding: 6px 12px;
     }
 
     .stat-card {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .stat-icon-wrapper {
-        padding: 0.7rem;
     }
 
     .stat-info h3 {
         font-size: 1.1rem;
     }
 
-    .inventory-table {
-        min-width: 600px;
-        /* allows horizontal scroll */
+    .inventory-card {
+        padding: 1.2rem;
     }
 
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .inventory-table th,
-    .inventory-table td {
-        padding: 0.6rem;
-        font-size: 0.8rem;
-    }
-
-    .loader-container {
-        padding: 2rem;
+    .item-name {
+        font-size: 16px;
     }
 }

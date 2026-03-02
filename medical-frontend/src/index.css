@@ -24,3 +24,9 @@ h6 {
 table {
     font-variant-numeric: tabular-nums;
 }
+
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}

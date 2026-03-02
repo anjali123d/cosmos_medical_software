@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import API from "../api";
-import { RefreshCcw, AlertCircle, CheckCircle } from 'react-feather';
+import { Search, AlertCircle, CheckCircle } from "react-feather";
 import "./ReturnItem.css";
 
 const ReturnItem = () => {
     const [issues, setIssues] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -14,9 +16,10 @@ const ReturnItem = () => {
         damageCharge: 0
     });
 
+    const wrapperRef = useRef(null);
+
     const fetchIssues = async () => {
         try {
-            // Fetch only NOT returned issues
             const res = await API.get("/issues/active");
             setIssues(res.data);
         } catch {
@@ -27,6 +30,31 @@ const ReturnItem = () => {
     useEffect(() => {
         fetchIssues();
     }, []);
+
+    // Close suggestion if click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const filteredIssues = useMemo(() => {
+        if (!searchTerm) return [];
+        return issues.filter(issue =>
+            issue.patient?.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            issue.item?.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [issues, searchTerm]);
+
+    const handleSelect = (issue) => {
+        setForm({ ...form, issueId: issue._id });
+        setSearchTerm(`${issue.patient?.patientName} - ${issue.item?.itemName}`);
+        setShowSuggestions(false);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -48,6 +76,7 @@ const ReturnItem = () => {
             setSuccess("✅ Item Returned Successfully");
             fetchIssues();
             setForm({ issueId: "", damageCharge: 0 });
+            setSearchTerm("");
 
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
@@ -61,7 +90,6 @@ const ReturnItem = () => {
         <div className="return-container">
             <header className="page-header">
                 <h1>Item Return</h1>
-
             </header>
 
             <div className="card">
@@ -71,19 +99,50 @@ const ReturnItem = () => {
                     {error && <div className="alert error-alert"><AlertCircle size={16} /> {error}</div>}
                     {success && <div className="alert success-alert"><CheckCircle size={16} /> {success}</div>}
 
-                    <div className="input-field">
-                        <label>Select Issued Item</label>
-                        <select
-                            value={form.issueId}
-                            onChange={(e) => setForm({ ...form, issueId: e.target.value })}
-                        >
-                            <option value="">Select...</option>
-                            {issues.map(issue => (
-                                <option key={issue._id} value={issue._id}>
-                                    {issue.patient?.patientName} - {issue.item?.itemName} (Qty: {issue.qty})
-                                </option>
-                            ))}
-                        </select>
+                    {/* 🔍 AUTOCOMPLETE SEARCH */}
+                    <div className="input-field" ref={wrapperRef}>
+                        <label>
+                            <Search size={14} /> Search Patient / Item
+                        </label>
+
+                        <input
+                            type="text"
+                            placeholder="Type patient name..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setShowSuggestions(true);
+                                setForm({ ...form, issueId: "" });
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                        />
+
+                        {showSuggestions && filteredIssues.length > 0 && (
+                            <div className="suggestion-box">
+                                {filteredIssues.map(issue => (
+                                    <div
+                                        key={issue._id}
+                                        className="suggestion-item"
+                                        onClick={() => handleSelect(issue)}
+                                    >
+                                        <div className="suggestion-main">
+                                            {issue.patient?.patientName}
+                                        </div>
+                                        <div className="suggestion-sub">
+                                            {issue.item?.itemName} (Qty: {issue.qty})
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {showSuggestions && searchTerm && filteredIssues.length === 0 && (
+                            <div className="suggestion-box">
+                                <div className="suggestion-item no-result">
+                                    No matching records found
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="input-field">
@@ -91,9 +150,10 @@ const ReturnItem = () => {
                         <input
                             type="number"
                             min="0"
-                            placeholder="0"
                             value={form.damageCharge}
-                            onChange={(e) => setForm({ ...form, damageCharge: e.target.value })}
+                            onChange={(e) =>
+                                setForm({ ...form, damageCharge: e.target.value })
+                            }
                         />
                     </div>
 

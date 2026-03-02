@@ -64,7 +64,7 @@
 
 /* Page scroll area */
 .page-content {
-    padding: 24px;
+    padding: 10px;
     flex: 1;
     overflow-y: auto;
 }

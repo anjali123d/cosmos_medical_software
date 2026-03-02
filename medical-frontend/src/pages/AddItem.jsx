@@ -107,7 +107,6 @@ const AddItem = () => {
             {/* Header Area */}
             <div className="page-header">
                 <div className="header-left">
-                   
                     <div>
                         <h1>Inventory Management</h1>
                         <p>Add or update medical supplies and equipment</p>
@@ -134,7 +133,7 @@ const AddItem = () => {
                                 <label>Item Name</label>
                                 <input
                                     name="itemName"
-                                    placeholder="Item Name"
+                                    placeholder="Enter item name"
                                     value={form.itemName}
                                     onChange={handleChange}
                                 />
@@ -147,6 +146,7 @@ const AddItem = () => {
                                         name="totalStock"
                                         type="number"
                                         placeholder="0"
+                                        min="0"
                                         value={form.totalStock}
                                         onChange={handleChange}
                                     />
@@ -157,6 +157,7 @@ const AddItem = () => {
                                         name="depositPerItem"
                                         type="number"
                                         placeholder="0"
+                                        min="0"
                                         value={form.depositPerItem}
                                         onChange={handleChange}
                                     />
@@ -177,54 +178,70 @@ const AddItem = () => {
                     </div>
                 </div>
 
-                {/* Right Side: List */}
+                {/* Right Side: List - Card Based Layout */}
                 <div className="list-section">
                     <div className="glass-card">
                         <div className="list-header">
                             <h3>Current Inventory</h3>
-                            <span className="count-badge">{items.length} Items</span>
+                           
                         </div>
 
-                        <div className="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Item Detail</th>
-                                        <th>Stock</th>
-                                        <th>Deposit</th>
-                                        <th className="text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {items.map((item) => (
-                                        <tr key={item._id} className={item.totalStock <= 5 ? "low-stock-row" : ""}>
-                                            <td>
-                                                <div className="item-info">
-                                                    <div className="item-icon"><Package size={14} /></div>
-                                                    <span>{item.itemName}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className={`stock-tag ${item.totalStock <= 5 ? 'low' : ''}`}>
-                                                    {item.totalStock}
-                                                </span>
-                                            </td>
-                                            <td className="price-col">₹{item.depositPerItem}</td>
-                                            <td className="text-right">
-                                                <div className="action-btns">
-                                                    <button className="icon-btn edit" onClick={() => handleEdit(item)}>
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button className="icon-btn delete" onClick={() => handleDelete(item._id)}>
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            {items.length === 0 && <div className="empty-state">No medical items found in records.</div>}
+                        <div className="items-grid">
+                            {items.map((item) => (
+                                <div
+                                    key={item._id}
+                                    className={`item-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
+                                >
+                                    <div className="item-card-header">
+                                        <div className="item-title">
+                                            <div className="item-icon">
+                                                <Package size={18} />
+                                            </div>
+                                            <h4>{item.itemName}</h4>
+                                        </div>
+                                        <div className="item-actions">
+                                            <button
+                                                className="icon-btn edit"
+                                                onClick={() => handleEdit(item)}
+                                                aria-label="Edit item"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                className="icon-btn delete"
+                                                onClick={() => handleDelete(item._id)}
+                                                aria-label="Delete item"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="item-details">
+                                        <div className="detail-row">
+                                            <span className="detail-label">Stock Quantity:</span>
+                                            <span className={`detail-value stock-value ${item.totalStock <= 5 ? "low" : ""}`}>
+                                                {item.totalStock} units
+                                            </span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <span className="detail-label">Deposit Amount:</span>
+                                            <span className="detail-value deposit-value">
+                                                ₹{item.depositPerItem}
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            ))}
+
+                            {items.length === 0 && (
+                                <div className="empty-state">
+                                    <Package size={48} />
+                                    <p>No medical items found in records.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

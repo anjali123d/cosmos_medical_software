@@ -84,24 +84,44 @@ const Dashboard = () => {
                         </div>
                     ) : (
                         <div className="table-container">
-                            <table className="inventory-table">
-                                <thead>
-                                    <tr>
-                                        <th>Item Name</th>
-                                        <th>Current Stock</th>
-                                        <th>Unit Deposit</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredItems.map(item => (
-                                        <tr key={item._id}>
-                                            <td>{item.itemName}</td>
-                                            <td>{item.totalStock}</td>
-                                            <td>₹{item.depositPerItem}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <div className="inventory-grid">
+                                {filteredItems.length === 0 ? (
+                                    <div className="empty-state">
+                                        <Package size={40} />
+                                        <p>No medical items found</p>
+                                    </div>
+                                ) : (
+                                    filteredItems.map(item => (
+                                        <div
+                                            key={item._id}
+                                            className={`inventory-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
+                                        >
+                                            <div className="card-top">
+                                                <div className="item-icon">
+                                                    <Package size={18} />
+                                                </div>
+                                                <span className={`stock-badge ${item.totalStock <= 5 ? "low" : "normal"}`}>
+                                                    {item.totalStock <= 5 ? "Low Stock" : "Available"}
+                                                </span>
+                                            </div>
+
+                                            <h4 className="item-name">{item.itemName}</h4>
+
+                                            <div className="card-details">
+                                                <div>
+                                                    <p>Stock Units</p>
+                                                    <h3>{item.totalStock}</h3>
+                                                </div>
+                                                <div>
+                                                    <p>Unit Deposit</p>
+                                                    <h3>₹{item.depositPerItem}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
                         </div>
                     )}
                     {error && <div className="error-message">{error}</div>}

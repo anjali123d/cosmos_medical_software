@@ -92,7 +92,7 @@ const AddPatient = () => {
         <div className="add-patient-container">
             <div className="page-header">
                 <div className="header-left">
-                   
+
                     <div>
                         <h1>Patient Directory</h1>
                         <p>Manage medical patient registrations and records</p>
@@ -101,54 +101,7 @@ const AddPatient = () => {
             </div>
 
             <div className="content-layout">
-                {/* Registration Form */}
-                <div className="form-section">
-                    <div className="glass-card">
-                        <div className="card-header">
-                            <div className="icon-box"><UserPlus size={20} /></div>
-                            <h3>New Registration</h3>
-                        </div>
-
-                        <form onSubmit={handleSubmit}>
-
-                            <div className="input-group">
-                                <label><User size={14} /> Full Name</label>
-                                <input
-                                    name="patientName"
-                                    placeholder="Enter full name"
-                                    value={form.patientName}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <div className="input-group">
-                                <label><Phone size={14} /> Mobile Number</label>
-                                <input
-                                    name="mobile"
-                                    placeholder="10-digit number"
-                                    maxLength="10"
-                                    value={form.mobile}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <div className="input-group">
-                                <label><MapPin size={14} /> Residential Address</label>
-                                <textarea
-                                    name="address"
-                                    placeholder="Current address"
-                                    rows="3"
-                                    value={form.address}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <button type="submit" className="primary-btn" disabled={loading}>
-                                {loading ? "Registering..." : "Register Patient"}
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                
 
                 {/* Patient List */}
                 <div className="list-section">
@@ -165,42 +118,35 @@ const AddPatient = () => {
                             </div>
                         </div>
 
-                        <div className="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Patient Info</th>
-                                        <th>Address</th>
-                                        <th className="text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredPatients.map((p) => (
-                                        <tr key={p._id}>
-                                            <td>
-                                                <div className="patient-info-cell">
-                                                    <div className="avatar-small">
-                                                        {p.patientName.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="p-name">{p.patientName}</div>
-                                                        <div className="p-phone">{p.mobile}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-address">{p.address}</td>
-                                            <td className="text-right">
-                                                <button className="delete-icon-btn" onClick={() => handleDelete(p._id)}>
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="patient-list">
                             {filteredPatients.length === 0 && (
                                 <div className="empty-state">No matching records found.</div>
                             )}
+
+                            {filteredPatients.map((p) => (
+                                <div key={p._id} className="patient-card">
+                                    <div className="patient-left">
+                                        <div className="avatar-small">
+                                            {p.patientName.charAt(0).toUpperCase()}
+                                        </div>
+
+                                        <div className="patient-details">
+                                            <div className="p-name">{p.patientName}</div>
+                                            <div className="p-phone">{p.mobile}</div>
+                                            <div className="p-address">{p.address}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="patient-actions">
+                                        <button
+                                            className="delete-icon-btn"
+                                            onClick={() => handleDelete(p._id)}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
