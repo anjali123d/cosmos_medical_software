@@ -11,7 +11,7 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://cosmos-medical-software-x72z.vercel.app"
+            "https://cosmos-medical-software.vercel.app"
         ],
         credentials: true,
     })
