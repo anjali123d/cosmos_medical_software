@@ -11,14 +11,12 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://cosmos-medical-software.vercel.app",
             "https://cosmos-medical-software-x72z.vercel.app"
         ],
         credentials: true,
     })
 );
 
-app.options("*", cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
