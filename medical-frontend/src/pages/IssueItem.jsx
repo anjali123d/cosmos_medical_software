@@ -145,8 +145,7 @@ const IssueItem = () => {
                     <h3>New Issue Entry</h3>
 
                     <form onSubmit={handleSubmit}>
-                        {error && <div className="alert error">{error}</div>}
-                        {success && <div className="alert success">{success}</div>}
+
 
                         <div className="input-field">
                             <label>Patient Name</label>
@@ -221,6 +220,8 @@ const IssueItem = () => {
                         <button className="submit-btn" disabled={loading}>
                             {loading ? "Processing..." : "Confirm Issue"}
                         </button>
+                        {error && <div className="alert error">{error}</div>}
+                        {success && <div className="alert success">{success}</div>}
                     </form>
                 </section>
 

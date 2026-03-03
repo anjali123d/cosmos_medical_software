@@ -96,8 +96,6 @@ const ReturnItem = () => {
                 <h2>Return Medical Item</h2>
 
                 <form onSubmit={handleSubmit}>
-                    {error && <div className="alert error-alert"><AlertCircle size={16} /> {error}</div>}
-                    {success && <div className="alert success-alert"><CheckCircle size={16} /> {success}</div>}
 
                     {/* 🔍 AUTOCOMPLETE SEARCH */}
                     <div className="input-field" ref={wrapperRef}>
@@ -160,6 +158,9 @@ const ReturnItem = () => {
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? "Processing..." : "Confirm Return"}
                     </button>
+                    {error && <div className="alert error-alert"><AlertCircle size={16} /> {error}</div>}
+                    {success && <div className="alert success-alert"><CheckCircle size={16} /> {success}</div>}
+
                 </form>
             </div>
         </div>

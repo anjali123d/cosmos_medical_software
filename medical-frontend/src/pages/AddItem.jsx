@@ -126,8 +126,7 @@ const AddItem = () => {
                         </div>
 
                         <form onSubmit={handleSubmit}>
-                            {error && <div className="alert error"><AlertCircle size={18} /> {error}</div>}
-                            {success && <div className="alert success"><CheckCircle size={18} /> {success}</div>}
+
 
                             <div className="input-group">
                                 <label>Item Name</label>
@@ -174,6 +173,8 @@ const AddItem = () => {
                                     </button>
                                 )}
                             </div>
+                            {error && <div className="alert error"><AlertCircle size={18} /> {error}</div>}
+                            {success && <div className="alert success"><CheckCircle size={18} /> {success}</div>}
                         </form>
                     </div>
                 </div>
