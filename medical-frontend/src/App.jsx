@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation,Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import AddItem from "./pages/AddItem";
@@ -86,9 +86,9 @@ function Layout() {
 
 function App() {
   return (
-    <Router>
-      <Layout />
-    </Router>
+
+    <Layout />
+
   );
 }
 
