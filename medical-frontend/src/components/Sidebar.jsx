@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
     FaHome, FaBoxOpen, FaUserPlus,
     FaExchangeAlt, FaUndo, FaSignOutAlt
@@ -8,9 +8,15 @@ import { Activity, X } from 'react-feather';
 import './Sidebar.css'
 import logo from './../assets/logo.png'
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+
+    const navigate = useNavigate();
     // Add an overlay for mobile so users can click outside to close
     const handleClose = () => {
         if (window.innerWidth <= 992) toggleSidebar();
+    };
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/login");
     };
 
     return (
@@ -24,7 +30,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     {/* Header Section */}
                     <div className="sidebar-brand">
                         <div className="brand-logo">
-                            <img src={logo}/>
+                            <img src={logo} />
                         </div>
                         <span className="brand-name">Medical Stock</span>
                         <button className="mobile-close-btn" onClick={toggleSidebar}>
@@ -47,8 +53,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             <SidebarLink to="/return" icon={<FaUndo />} label="Return Item" onClick={handleClose} />
                         </div>
                     </nav>
+                    <div className="sidebar-footer">
+                        <button className="logout-btn" onClick={handleLogout}>
+                            <FaSignOutAlt className="logout-icon" />
+                            <span>Logout</span>
+                        </button>
+                    </div>
 
-                  
                 </div>
             </aside>
         </>

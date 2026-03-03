@@ -75,3 +75,8 @@
         margin-left: 0;
     }
 }
+
+/* Login page full width */
+.login-layout {
+    margin-left: 0 !important;
+}
