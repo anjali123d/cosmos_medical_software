@@ -21,7 +21,7 @@ const Login = () => {
         e.preventDefault();
         setError("");
 
-        if (!form.email || !form.password) {
+        if (!form.password) {
             setError("All fields are required");
             return;
         }
@@ -30,7 +30,7 @@ const Login = () => {
 
         setTimeout(() => {
             if (
-                form.email === STATIC_EMAIL &&
+
                 form.password === STATIC_PASSWORD
             ) {
                 // Fake token store
@@ -68,9 +68,6 @@ const Login = () => {
                             type="email"
                             placeholder="Enter Email"
                             value={STATIC_EMAIL}
-                            onChange={(e) =>
-                                setForm({ ...form, email: e.target.value })
-                            }
                             readOnly
                         />
                     </div>
