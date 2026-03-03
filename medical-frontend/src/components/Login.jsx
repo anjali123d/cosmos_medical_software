@@ -67,10 +67,11 @@ const Login = () => {
                         <input
                             type="email"
                             placeholder="Enter Email"
-                            value={form.email}
+                            value={STATIC_EMAIL}
                             onChange={(e) =>
                                 setForm({ ...form, email: e.target.value })
                             }
+                            readOnly
                         />
                     </div>
 
