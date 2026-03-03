@@ -1,165 +1,48 @@
-// import { useEffect, useState } from "react";
-// import API from "../api";
-// import "./Dashboard.css";
-// import {
-//     Package, TrendingUp, Activity,
-//     Search, DollarSign
-// } from 'react-feather';
-
-// // --- SUB-COMPONENT: STAT CARD ---
-// const StatCard = ({ icon, label, value, color }) => (
-//     <div className={`stat-card ${color}`}>
-//         <div className="stat-icon-wrapper">{icon}</div>
-//         <div className="stat-info">
-//             <p>{label}</p>
-//             <h3>{value}</h3>
-//         </div>
-//     </div>
-// );
-
-// // --- MAIN DASHBOARD COMPONENT ---
-// const Dashboard = () => {
-//     const [items, setItems] = useState([]);
-//     const [issues, setIssues] = useState([]);
-//     const [returns, setReturns] = useState([]);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState("");
-//     const [search, setSearch] = useState("");
-
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             try {
-//                 const [itemRes, issueRes, returnRes] = await Promise.all([
-//                     API.get("/items"),
-//                     API.get("/issues"),
-//                     API.get("/returns")
-//                 ]);
-//                 setItems(itemRes.data);
-//                 setIssues(issueRes.data);
-//                 setReturns(returnRes.data);
-//             } catch (err) {
-//                 setError("Failed to load dashboard data. Check API connection.");
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-//         fetchData();
-//     }, []);
-
-//     // Calculations
-//     const totalStock = items.reduce((sum, i) => sum + i.totalStock, 0);
-//     const activeIssues = issues.filter(i => !i.isReturned);
-//     const totalDeposit = issues.reduce((sum, i) => sum + i.totalDeposit, 0);
-//     const totalRefund = returns.reduce((sum, r) => sum + r.refundAmount, 0);
-//     const netDeposit = totalDeposit - totalRefund;
-
-//     const filteredItems = items.filter(item =>
-//         item.itemName.toLowerCase().includes(search.toLowerCase())
-//     );
-
-//     return (
-//         <div className="dashboard-container">
-
-
-//             <main className="main-content">
-//                 <section className="content-body">
-//                     {/* STATS GRID */}
-//                     <div className="stats-grid">
-//                         <StatCard icon={<Package size={24} />} label="Total Inventory" value={items.length} color="blue" />
-//                         <StatCard icon={<TrendingUp size={24} />} label="Total Stock Units" value={totalStock} color="green" />
-//                         <StatCard icon={<Activity size={24} />} label="Active Issues" value={activeIssues.length} color="orange" />
-//                         <StatCard icon={<DollarSign size={24} />} label="Net Security Deposit" value={`₹${netDeposit.toLocaleString()}`} color="purple" />
-//                     </div>
-
-//                     {/* INVENTORY TABLE */}
-//                     <div className="section-header">
-//                         <h3>Inventory Status</h3>
-//                         <span className="date-text">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
-//                     </div>
-
-//                     {loading ? (
-//                         <div className="loader-container">
-//                             <div className="spinner"></div>
-//                             <p>Loading medical data...</p>
-//                         </div>
-//                     ) : (
-//                         <div className="table-container">
-//                             <div className="inventory-grid">
-//                                 {filteredItems.length === 0 ? (
-//                                     <div className="empty-state">
-//                                         <Package size={40} />
-//                                         <p>No medical items found</p>
-//                                     </div>
-//                                 ) : (
-//                                     filteredItems.map(item => (
-//                                         <div
-//                                             key={item._id}
-//                                             className={`inventory-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
-//                                         >
-//                                             <div className="card-top">
-//                                                 <div className="item-icon">
-//                                                     <Package size={18} />
-//                                                 </div>
-//                                                 <span className={`stock-badge ${item.totalStock <= 5 ? "low" : "normal"}`}>
-//                                                     {item.totalStock <= 5 ? "Low Stock" : "Available"}
-//                                                 </span>
-//                                             </div>
-
-//                                             <h4 className="item-name">{item.itemName}</h4>
-
-//                                             <div className="card-details">
-//                                                 <div>
-//                                                     <p>Stock Units</p>
-//                                                     <h3>{item.totalStock}</h3>
-//                                                 </div>
-//                                                 <div>
-//                                                     <p>Unit Deposit</p>
-//                                                     <h3>₹{item.depositPerItem}</h3>
-//                                                 </div>
-//                                             </div>
-//                                         </div>
-//                                     ))
-//                                 )}
-//                             </div>
-
-//                         </div>
-//                     )}
-//                     {error && <div className="error-message">{error}</div>}
-//                 </section>
-//             </main>
-//         </div>
-//     );
-// };
-
-// export default Dashboard;
-
 import { useEffect, useState } from "react";
 import API from "../api";
 import "./Dashboard2.css";
-import { Package } from "react-feather";
+import { Package, Plus, X } from "react-feather";
 
 const Dashboard = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [search, setSearch] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
+    const [form, setForm] = useState({
+        itemName: "",
+        totalStock: "",
+        depositPerItem: ""
+    });
 
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                const res = await API.get("/items");
-                setItems(res.data);
-            } catch (err) {
-                setError("Failed to load inventory data. Check API connection.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchItems();
     }, []);
 
-    // Search filter
+    const fetchItems = async () => {
+        try {
+            const res = await API.get("/items");
+            setItems(res.data);
+        } catch (err) {
+            setError("Failed to load inventory data. Check API connection.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await API.post("/items", form);
+            setForm({ itemName: "", totalStock: "", depositPerItem: "" });
+            setShowModal(false);
+            fetchItems();
+        } catch (err) {
+            alert("Failed to add item");
+        }
+    };
+
     const filteredItems = items.filter(item =>
         item.itemName.toLowerCase().includes(search.toLowerCase())
     );
@@ -181,7 +64,7 @@ const Dashboard = () => {
                         />
                     </div>
 
-                    {/* LOADING */}
+                    {/* ITEMS */}
                     {loading ? (
                         <div className="loader-container">
                             <div className="spinner"></div>
@@ -189,35 +72,71 @@ const Dashboard = () => {
                         </div>
                     ) : (
                         <div className="inventory-simple-grid">
-                            {filteredItems.length === 0 ? (
-                                <div className="empty-state">
-                                    <Package size={40} />
-                                    <p>No medical items found</p>
+                            {filteredItems.map(item => (
+                                <div
+                                    key={item._id}
+                                    className={`inventory-simple-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
+                                >
+                                    <h4 className="item-name">
+                                        <Package size={18} style={{ marginRight: "6px" }} />
+                                        {item.itemName}
+                                    </h4>
+                                    <p className="stock-text">
+                                        Stock: <span>{item.totalStock}</span>
+                                    </p>
                                 </div>
-                            ) : (
-                                filteredItems.map(item => (
-                                    <div
-                                        key={item._id}
-                                        className={`inventory-simple-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
-                                    >
-                                        <h4 className="item-name">
-                                            <Package size={18} style={{ marginRight: "6px" }} />
-                                            {item.itemName}
-                                        </h4>
-
-                                        <p className="stock-text">
-                                            Stock: <span>{item.totalStock}</span>
-                                        </p>
-                                    </div>
-                                ))
-                            )}
+                            ))}
                         </div>
                     )}
 
                     {error && <div className="error-message">{error}</div>}
-
                 </section>
             </main>
+
+            {/* FLOATING BUTTON */}
+            <button className="floating-btn" onClick={() => setShowModal(true)}>
+                <Plus size={24} />
+            </button>
+
+            {/* MODAL */}
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h3>Add New Inventory</h3>
+                            <X size={20} onClick={() => setShowModal(false)} className="close-icon" />
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="modal-form">
+                            <input
+                                type="text"
+                                placeholder="Item Name"
+                                value={form.itemName}
+                                onChange={(e) => setForm({ ...form, itemName: e.target.value })}
+                                required
+                            />
+                            <input
+                                type="number"
+                                placeholder="Total Stock"
+                                value={form.totalStock}
+                                onChange={(e) => setForm({ ...form, totalStock: e.target.value })}
+                                required
+                            />
+                            <input
+                                type="number"
+                                placeholder="Deposit Per Item"
+                                value={form.depositPerItem}
+                                onChange={(e) => setForm({ ...form, depositPerItem: e.target.value })}
+                                required
+                            />
+
+                            <button type="submit" className="submit-btn">
+                                Add Item
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

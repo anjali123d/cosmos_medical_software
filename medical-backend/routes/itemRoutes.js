@@ -23,5 +23,19 @@ router.put("/:id", async (req, res) => {
     );
     res.json(updated);
 });
+// Delete Item
+router.delete("/:id", async (req, res) => {
+    try {
+        const deletedItem = await MedicalItem.findByIdAndDelete(req.params.id);
+
+        if (!deletedItem) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+
+        res.json({ message: "Item deleted successfully", deletedItem });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting item", error });
+    }
+});
 
 module.exports = router;
