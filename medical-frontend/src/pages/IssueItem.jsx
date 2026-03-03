@@ -9,31 +9,19 @@ const IssueItem = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [showForm, setShowForm] = useState(false);
 
     const [form, setForm] = useState({
+        receiptNo: "",
+        reference: "",
         patientName: "",
         mobile: "",
         address: "",
-        item: "",
-        qty: 1,
-        customDeposit: 0
+        selectedItems: [],
+        totalDeposit: 0
     });
 
-    const selectedItem = items.find(i => i._id === form.item);
-
-    // 🔹 Auto calculate deposit (but editable)
-    useEffect(() => {
-        if (selectedItem) {
-            setForm(prev => ({
-                ...prev,
-                customDeposit: prev.qty * selectedItem.depositPerItem
-            }));
-        }
-    }, [form.item, form.qty]);
-
+    // Fetch Data
     const fetchAllData = async () => {
         try {
             const [pRes, iRes, issueRes] = await Promise.all([
@@ -53,42 +41,34 @@ const IssueItem = () => {
         fetchAllData();
     }, []);
 
-    const filteredIssues = useMemo(() => {
-        return issues.filter(issue => {
-            const issueDate = new Date(issue.createdAt).setHours(0, 0, 0, 0);
-            const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-            const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
+    // Auto deposit calculation for multiple items
+    useEffect(() => {
+        if (form.selectedItems.length > 0) {
+            const total = form.selectedItems.reduce((sum, itemId) => {
+                const item = items.find(i => i._id === itemId);
+                return sum + (item?.depositPerItem || 0);
+            }, 0);
 
-            if (start && issueDate < start) return false;
-            if (end && issueDate > end) return false;
-            return true;
-        });
-    }, [issues, startDate, endDate]);
+            setForm(prev => ({
+                ...prev,
+                totalDeposit: total
+            }));
+        }
+    }, [form.selectedItems, items]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setSuccess("");
 
-        if (!form.patientName || !form.mobile || !form.address || !form.item) {
+        if (!form.patientName || !form.mobile || !form.address || form.selectedItems.length === 0) {
             setError("All fields are required");
-            return;
-        }
-
-        if (!/^[0-9]{10}$/.test(form.mobile)) {
-            setError("Mobile must be 10 digits");
-            return;
-        }
-
-        if (selectedItem && form.qty > selectedItem.totalStock) {
-            setError(`Only ${selectedItem.totalStock} items available`);
             return;
         }
 
         try {
             setLoading(true);
 
-            // Check if patient exists
             let existingPatient = patients.find(
                 p => p.mobile === form.mobile
             );
@@ -106,23 +86,25 @@ const IssueItem = () => {
                 patientId = existingPatient._id;
             }
 
-            // Create Issue with custom deposit
             await API.post("/issues", {
+                receiptNo: form.receiptNo,
+                reference: form.reference,
                 patient: patientId,
-                item: form.item,
-                qty: Number(form.qty),
-                totalDeposit: Number(form.customDeposit)
+                items: form.selectedItems,
+                totalDeposit: Number(form.totalDeposit)
             });
 
-            setSuccess("Patient added & item issued successfully");
+            setSuccess("Issue created successfully");
+            setShowForm(false);
 
             setForm({
+                receiptNo: "",
+                reference: "",
                 patientName: "",
                 mobile: "",
                 address: "",
-                item: "",
-                qty: 1,
-                customDeposit: 0
+                selectedItems: [],
+                totalDeposit: 0
             });
 
             fetchAllData();
@@ -134,128 +116,128 @@ const IssueItem = () => {
         }
     };
 
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    };
+
     return (
         <div className="issue-container">
-            <h1>Stock Distribution</h1>
+            <div className="history-header">
+                <h2>Transaction History</h2>
+                <button className="add-btn" onClick={() => setShowForm(true)}>
+                    + New Issue
+                </button>
+            </div>
 
-            <div className="issue-grid">
+            {/* History List */}
+            <div className="history-card">
+                <div className="history-list">
+                    {issues.map(issue => (
+                        <div key={issue._id} className="history-item">
+                            <div>
+                                <strong>{issue.patient?.patientName}</strong>
+                                <div className="issue-date">
+                                    {formatDate(issue.createdAt)}
+                                </div>
 
-                {/* FORM */}
-                <section className="form-card">
-                    <h3>New Issue Entry</h3>
+                                <div>
+                                    {issue.items?.map(i => i.itemName).join(", ")}
+                                </div>
 
-                    <form onSubmit={handleSubmit}>
+                                <div className={`status-badge ${issue.isReturned ? "returned" : "issued"}`}>
+                                    {issue.isReturned ? "Returned" : "Issued"}
+                                </div>
+                            </div>
 
+                            <div>
+                                ₹{issue.totalDeposit}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                        <div className="input-field">
-                            <label>Patient Name</label>
+            {/* Floating Modal */}
+            {showForm && (
+                <div className="modal-overlay">
+                    <div className="modal-card">
+                        <div className="modal-header">
+                            <h3>New Issue Entry</h3>
+                            <button onClick={() => setShowForm(false)}>✕</button>
+                        </div>
+
+                        <form onSubmit={handleSubmit}>
                             <input
                                 type="text"
+                                placeholder="Receipt Number"
+                                value={form.receiptNo}
+                                onChange={e => setForm({ ...form, receiptNo: e.target.value })}
+                            />
+
+
+
+                            <input
+                                type="text"
+                                placeholder="Patient Name"
                                 value={form.patientName}
                                 onChange={e => setForm({ ...form, patientName: e.target.value })}
                             />
-                        </div>
 
-                        <div className="input-field">
-                            <label>Mobile</label>
                             <input
                                 type="text"
-                                maxLength="10"
+                                placeholder="Mobile"
                                 value={form.mobile}
                                 onChange={e => setForm({ ...form, mobile: e.target.value })}
                             />
-                        </div>
 
-                        <div className="input-field">
-                            <label>Address</label>
                             <textarea
-                                rows="2"
+                                placeholder="Address"
                                 value={form.address}
                                 onChange={e => setForm({ ...form, address: e.target.value })}
                             />
-                        </div>
-
-                        <div className="input-field">
-                            <label>Item</label>
+                            <input
+                                type="text"
+                                placeholder="Reference"
+                                value={form.reference}
+                                onChange={e => setForm({ ...form, reference: e.target.value })}
+                            />
                             <select
-                                value={form.item}
-                                onChange={e => setForm({ ...form, item: e.target.value })}
+                                multiple
+                                onChange={(e) => {
+                                    const selected = Array.from(
+                                        e.target.selectedOptions,
+                                        option => option.value
+                                    );
+                                    setForm({ ...form, selectedItems: selected });
+                                }}
                             >
-                                <option value="">Select Item</option>
-                                {items.map(i => (
-                                    <option key={i._id} value={i._id} disabled={i.totalStock === 0}>
-                                        {i.itemName} ({i.totalStock} available)
+                                {items.map(item => (
+                                    <option key={item._id} value={item._id}>
+                                        {item.itemName}
                                     </option>
                                 ))}
                             </select>
-                        </div>
 
-                        <div className="input-field">
-                            <label>Quantity</label>
                             <input
                                 type="number"
-                                min="1"
-                                value={form.qty}
-                                onChange={e => setForm({ ...form, qty: e.target.value })}
+                                value={form.totalDeposit}
+                                onChange={e => setForm({ ...form, totalDeposit: e.target.value })}
                             />
-                        </div>
 
-                        {selectedItem && (
-                            <div className="billing-box">
-                                <label>Deposit Amount</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={form.customDeposit}
-                                    onChange={(e) =>
-                                        setForm({ ...form, customDeposit: e.target.value })
-                                    }
-                                />
-                                <small className="note">
-                                    Default: ₹{form.qty * selectedItem.depositPerItem}
-                                </small>
-                            </div>
-                        )}
+                            <button className="submit-btn" disabled={loading}>
+                                {loading ? "Processing..." : "Confirm Issue"}
+                            </button>
 
-                        <button className="submit-btn" disabled={loading}>
-                            {loading ? "Processing..." : "Confirm Issue"}
-                        </button>
-                        {error && <div className="alert error">{error}</div>}
-                        {success && <div className="alert success">{success}</div>}
-                    </form>
-                </section>
-
-                {/* HISTORY */}
-                <section className="history-card">
-                    <h3>Transaction History</h3>
-
-                    <div className="history-list">
-                        {filteredIssues.map(issue => (
-                            <div key={issue._id} className="history-item">
-                                <div>
-                                    <strong>{issue.patient?.patientName}</strong>
-                                    <div>
-                                        {issue.item?.itemName} (x{issue.qty})
-                                    </div>
-
-                                    <div className={`status-badge ${issue.isReturned ? "returned" : "issued"}`}>
-                                        {issue.isReturned ? "Returned" : "Issued"}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    ₹{issue.totalDeposit}
-                                </div>
-                            </div>
-                        ))}
-
-                        {filteredIssues.length === 0 &&
-                            <div className="empty">No transactions found</div>
-                        }
+                            {error && <div className="alert error">{error}</div>}
+                            {success && <div className="alert success">{success}</div>}
+                        </form>
                     </div>
-                </section>
-
-            </div>
+                </div>
+            )}
         </div>
     );
 };
