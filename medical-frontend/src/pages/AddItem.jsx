@@ -109,75 +109,14 @@ const AddItem = () => {
                 <div className="header-left">
                     <div>
                         <h1>Inventory Management</h1>
-                        <p>Add or update medical supplies and equipment</p>
+                    
                     </div>
                 </div>
             </div>
 
             <div className="content-layout">
                 {/* Left Side: Form */}
-                <div className="form-section">
-                    <div className="glass-card" style={{ padding: '0px' }}>
-                        <div className="card-header">
-                            <div className="icon-box">
-                                {editingId ? <Edit2 size={20} /> : <Plus size={20} />}
-                            </div>
-                            <h3>{editingId ? "Update Item" : "Create New Item"}</h3>
-                        </div>
-
-                        <form onSubmit={handleSubmit}>
-
-
-                            <div className="input-group">
-                                <label>Item Name</label>
-                                <input
-                                    name="itemName"
-                                    placeholder="Enter item name"
-                                    value={form.itemName}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <div className="input-row">
-                                <div className="input-group">
-                                    <label>Total Stock</label>
-                                    <input
-                                        name="totalStock"
-                                        type="number"
-                                        placeholder="0"
-                                        min="0"
-                                        value={form.totalStock}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                <div className="input-group">
-                                    <label>Deposit (₹)</label>
-                                    <input
-                                        name="depositPerItem"
-                                        type="number"
-                                        placeholder="0"
-                                        min="0"
-                                        value={form.depositPerItem}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-actions">
-                                <button type="submit" className="primary-btn" disabled={loading}>
-                                    {loading ? "Processing..." : editingId ? "Save Changes" : "Add to Inventory"}
-                                </button>
-                                {editingId && (
-                                    <button type="button" className="cancel-btn" onClick={resetForm}>
-                                        Cancel
-                                    </button>
-                                )}
-                            </div>
-                            {error && <div className="alert error"><AlertCircle size={18} /> {error}</div>}
-                            {success && <div className="alert success"><CheckCircle size={18} /> {success}</div>}
-                        </form>
-                    </div>
-                </div>
+               
 
                 {/* Right Side: List - Card Based Layout */}
                 <div className="list-section">
