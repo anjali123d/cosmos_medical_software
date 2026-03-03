@@ -117,7 +117,7 @@ const AddItem = () => {
             <div className="content-layout">
                 {/* Left Side: Form */}
                 <div className="form-section">
-                    <div className="glass-card">
+                    <div className="glass-card" style={{ padding: '0px' }}>
                         <div className="card-header">
                             <div className="icon-box">
                                 {editingId ? <Edit2 size={20} /> : <Plus size={20} />}
@@ -183,7 +183,7 @@ const AddItem = () => {
                     <div className="glass-card">
                         <div className="list-header">
                             <h3>Current Inventory</h3>
-                           
+
                         </div>
 
                         <div className="items-grid">

@@ -1,0 +1,95 @@
+/* new css for inventry */
+.dashboard-container {
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-input {
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    width: 220px;
+}
+
+.search-input:focus {
+    border-color: #3b82f6;
+}
+
+.inventory-simple-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.inventory-simple-card {
+    background: #ffffff;
+    padding: 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: 0.3s ease;
+    border: solid 1px rgba(0, 0, 0, 0.308);
+}
+
+
+.item-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+}
+
+.stock-text {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.stock-text span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #111;
+}
+
+.loader-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.spinner {
+    width: 35px;
+    height: 35px;
+    border: 4px solid #ddd;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.error-message {
+    margin-top: 1rem;
+    color: red;
+    text-align: center;
+}
