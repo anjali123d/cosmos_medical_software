@@ -29,13 +29,17 @@
 }
 
 .brand-logo {
-    background: #4361ee;
-    padding: 8px;
+    background: #fff4f4;
+    padding: 10px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+
+}
+
+.brand-logo img {
+    height: 40px;
 }
 
 .brand-name {

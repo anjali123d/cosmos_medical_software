@@ -1,9 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import API from "../api";
-import {
-    Clipboard, User, Package, Hash,
-    AlertCircle, CheckCircle, Filter
-} from 'react-feather';
 import "./IssueItem.css";
 
 const IssueItem = () => {
@@ -22,11 +18,21 @@ const IssueItem = () => {
         mobile: "",
         address: "",
         item: "",
-        qty: 1
+        qty: 1,
+        customDeposit: 0
     });
 
     const selectedItem = items.find(i => i._id === form.item);
-    const totalDeposit = selectedItem ? form.qty * selectedItem.depositPerItem : 0;
+
+    // 🔹 Auto calculate deposit (but editable)
+    useEffect(() => {
+        if (selectedItem) {
+            setForm(prev => ({
+                ...prev,
+                customDeposit: prev.qty * selectedItem.depositPerItem
+            }));
+        }
+    }, [form.item, form.qty]);
 
     const fetchAllData = async () => {
         try {
@@ -82,7 +88,7 @@ const IssueItem = () => {
         try {
             setLoading(true);
 
-            // 1️⃣ Check if patient exists
+            // Check if patient exists
             let existingPatient = patients.find(
                 p => p.mobile === form.mobile
             );
@@ -100,11 +106,12 @@ const IssueItem = () => {
                 patientId = existingPatient._id;
             }
 
-            // 2️⃣ Create Issue
+            // Create Issue with custom deposit
             await API.post("/issues", {
                 patient: patientId,
                 item: form.item,
-                qty: Number(form.qty)
+                qty: Number(form.qty),
+                totalDeposit: Number(form.customDeposit)
             });
 
             setSuccess("Patient added & item issued successfully");
@@ -114,12 +121,13 @@ const IssueItem = () => {
                 mobile: "",
                 address: "",
                 item: "",
-                qty: 1
+                qty: 1,
+                customDeposit: 0
             });
 
             fetchAllData();
 
-        } catch (err) {
+        } catch {
             setError("Transaction failed");
         } finally {
             setLoading(false);
@@ -195,7 +203,18 @@ const IssueItem = () => {
 
                         {selectedItem && (
                             <div className="billing-box">
-                                Total: ₹{totalDeposit}
+                                <label>Deposit Amount</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={form.customDeposit}
+                                    onChange={(e) =>
+                                        setForm({ ...form, customDeposit: e.target.value })
+                                    }
+                                />
+                                <small className="note">
+                                    Default: ₹{form.qty * selectedItem.depositPerItem}
+                                </small>
                             </div>
                         )}
 
@@ -218,7 +237,6 @@ const IssueItem = () => {
                                         {issue.item?.itemName} (x{issue.qty})
                                     </div>
 
-                                    {/* ✅ STATUS LABEL */}
                                     <div className={`status-badge ${issue.isReturned ? "returned" : "issued"}`}>
                                         {issue.isReturned ? "Returned" : "Issued"}
                                     </div>

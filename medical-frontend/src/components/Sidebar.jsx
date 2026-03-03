@@ -6,6 +6,7 @@ import {
 } from "react-icons/fa";
 import { Activity, X } from 'react-feather';
 import './Sidebar.css'
+import logo from './../assets/logo.png'
 const Sidebar = ({ isOpen, toggleSidebar }) => {
     // Add an overlay for mobile so users can click outside to close
     const handleClose = () => {
@@ -23,9 +24,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     {/* Header Section */}
                     <div className="sidebar-brand">
                         <div className="brand-logo">
-                            <Activity color="white" size={24} strokeWidth={3} />
+                            <img src={logo}/>
                         </div>
-                        <span className="brand-name">MedStock <small>v1.0</small></span>
+                        <span className="brand-name">Medical Stock</span>
                         <button className="mobile-close-btn" onClick={toggleSidebar}>
                             <X size={20} />
                         </button>
