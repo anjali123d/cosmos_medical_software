@@ -109,14 +109,14 @@ const AddItem = () => {
                 <div className="header-left">
                     <div>
                         <h1>Inventory Management</h1>
-                    
+
                     </div>
                 </div>
             </div>
 
             <div className="content-layout">
                 {/* Left Side: Form */}
-               
+
 
                 {/* Right Side: List - Card Based Layout */}
                 <div className="list-section">
@@ -140,13 +140,7 @@ const AddItem = () => {
                                             <h4>{item.itemName}</h4>
                                         </div>
                                         <div className="item-actions">
-                                            <button
-                                                className="icon-btn edit"
-                                                onClick={() => handleEdit(item)}
-                                                aria-label="Edit item"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
+
                                             <button
                                                 className="icon-btn delete"
                                                 onClick={() => handleDelete(item._id)}
