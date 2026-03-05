@@ -81,17 +81,20 @@ const AddItem = () => {
             setLoading(false);
         }
     };
-
+    const [showForm, setShowForm] = useState(false);
     const handleEdit = (item) => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         setForm({
             itemName: item.itemName,
             totalStock: item.totalStock,
             depositPerItem: item.depositPerItem
         });
-        setEditingId(item._id);
-    };
 
+        setEditingId(item._id);
+
+        setShowForm(true); // modal open
+
+    };
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this item?")) return;
         try {
@@ -104,6 +107,89 @@ const AddItem = () => {
 
     return (
         <div className="add-item-container">
+            {showForm && (
+
+                <div className="modal-overlay">
+
+                    <div className="modal-card">
+
+                        <div className="modal-header">
+
+                            <h3>{editingId ? "Edit Item" : "Add New Item"}</h3>
+
+                            <button
+                                className="close-btn"
+                                onClick={() => setShowForm(false)}
+                            >
+                                <X size={18} />
+                            </button>
+
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="modal-form">
+
+                            <div className="form-group">
+
+                                <label>Item Name</label>
+
+                                <input
+                                    type="text"
+                                    name="itemName"
+                                    value={form.itemName}
+                                    onChange={handleChange}
+                                />
+
+                            </div>
+
+                            <div className="form-group">
+
+                                <label>Total Stock</label>
+
+                                <input
+                                    type="number"
+                                    name="totalStock"
+                                    value={form.totalStock}
+                                    onChange={handleChange}
+                                />
+
+                            </div>
+
+                            <div className="form-group">
+
+                                <label>Deposit Per Item</label>
+
+                                <input
+                                    type="number"
+                                    name="depositPerItem"
+                                    value={form.depositPerItem}
+                                    onChange={handleChange}
+                                />
+
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="submit-btn"
+                                disabled={loading}
+                            >
+
+                                {loading
+                                    ? "Processing..."
+                                    : editingId
+                                        ? "Update Item"
+                                        : "Add Item"}
+
+                            </button>
+
+                            {error && <div className="alert error">{error}</div>}
+                            {success && <div className="alert success">{success}</div>}
+
+                        </form>
+
+                    </div>
+                </div>
+
+            )}
             {/* Header Area */}
             <div className="page-header">
                 <div className="header-left">
@@ -117,7 +203,15 @@ const AddItem = () => {
             <div className="content-layout">
                 {/* Left Side: Form */}
 
-
+                <button
+                    className="add-btn"
+                    onClick={() => {
+                        resetForm();
+                        setShowForm(true);
+                    }}
+                >
+                    <Plus size={16} /> Add Item
+                </button>
                 {/* Right Side: List - Card Based Layout */}
                 <div className="list-section">
                     <div className="glass-card">
@@ -140,7 +234,13 @@ const AddItem = () => {
                                             <h4>{item.itemName}</h4>
                                         </div>
                                         <div className="item-actions">
-
+                                            <button
+                                                className="icon-btn edit"
+                                                onClick={() => handleEdit(item)}
+                                                aria-label="Edit item"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
                                             <button
                                                 className="icon-btn delete"
                                                 onClick={() => handleDelete(item._id)}
@@ -176,6 +276,7 @@ const AddItem = () => {
                                     <p>No medical items found in records.</p>
                                 </div>
                             )}
+
                         </div>
                     </div>
                 </div>
