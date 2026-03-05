@@ -2,45 +2,43 @@ const mongoose = require("mongoose");
 
 const issueSchema = new mongoose.Schema({
 
-    // Patient reference
     patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Patient",
         required: true
     },
 
-    // ✅ Multiple items
-    items: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "MedicalItem"
-    }],
-
-    // ✅ Receipt number
     receiptNo: {
         type: String,
         required: true
     },
 
-    // ✅ Reference field
-    reference: {
-        type: String
-    },
+    reference: String,
 
-    // Total deposit amount
+    items: [
+        {
+            item: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "MedicalItem"
+            },
+            qty: {
+                type: Number,
+                default: 1
+            }
+        }
+    ],
+
     totalDeposit: {
         type: Number,
         required: true
     },
 
-    // Return Status
     isReturned: {
         type: Boolean,
         default: false
     },
 
-    returnedAt: {
-        type: Date
-    }
+    returnedAt: Date
 
 }, { timestamps: true });
 

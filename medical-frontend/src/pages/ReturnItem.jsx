@@ -52,15 +52,24 @@ const ReturnItem = () => {
 
     const filteredIssues = useMemo(() => {
         if (!searchTerm) return [];
-        return issues.filter(issue =>
-            issue.patient?.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            issue.item?.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+
+        return issues.filter(issue => {
+
+            const itemNames = issue.items
+                ?.map(i => i.itemName.toLowerCase())
+                .join(" ");
+
+            return (
+                issue.patient?.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                itemNames?.includes(searchTerm.toLowerCase())
+            );
+        });
+
     }, [issues, searchTerm]);
 
     const handleSelect = (issue) => {
         setForm({ ...form, issueId: issue._id });
-        setSearchTerm(`${issue.patient?.patientName} - ${issue.item?.itemName}`);
+        setSearchTerm(`${issue.patient?.patientName} - ${issue.items?.map(i => i.itemName).join(", ")}`);
         setShowSuggestions(false);
     };
 

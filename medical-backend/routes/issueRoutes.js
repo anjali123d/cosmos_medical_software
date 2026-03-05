@@ -5,50 +5,53 @@ const MedicalItem = require("../models/MedicalItem");
 
 // Create 
 router.post("/", async (req, res) => {
+
     try {
 
-        const { patient, items, receiptNo, reference, totalDeposit } = req.body;
+        const { patient, items, receiptNo, reference } = req.body;
 
-        if (!patient || !items || items.length === 0 || !receiptNo) {
-            return res.status(400).json({ message: "Invalid input data" });
+        if (!patient || !items || items.length === 0) {
+            return res.status(400).json({ message: "Invalid data" });
         }
 
-        // Check stock for each item
-        for (let itemId of items) {
+        let totalDeposit = 0;
 
-            const medicalItem = await MedicalItem.findById(itemId);
+        for (let data of items) {
+
+            const medicalItem = await MedicalItem.findById(data.item);
 
             if (!medicalItem) {
                 return res.status(404).json({ message: "Item not found" });
             }
 
-            if (medicalItem.totalStock <= 0) {
+            if (medicalItem.totalStock < data.qty) {
                 return res.status(400).json({
-                    message: `${medicalItem.itemName} out of stock`
+                    message: `${medicalItem.itemName} stock not available`
                 });
             }
 
-            // Reduce stock
-            medicalItem.totalStock -= 1;
+            // reduce stock
+            medicalItem.totalStock -= data.qty;
             await medicalItem.save();
+
+            totalDeposit += medicalItem.depositPerItem * data.qty;
         }
 
         const issue = await Issue.create({
             patient,
-            items,
             receiptNo,
             reference,
+            items,
             totalDeposit
         });
 
-        res.status(201).json(issue);
+        res.json(issue);
 
     } catch (err) {
-        console.error("Issue Error:", err);
         res.status(500).json({ message: "Issue failed" });
     }
-});
 
+});
 
 // Get all issues
 router.get("/", async (req, res) => {
