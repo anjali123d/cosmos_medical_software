@@ -23,8 +23,10 @@ const IssueItem = () => {
         totalDeposit: 0
     });
 
-
+    // ===============================
     // Fetch Data
+    // ===============================
+
     const fetchAllData = async () => {
         try {
 
@@ -47,45 +49,49 @@ const IssueItem = () => {
         fetchAllData();
     }, []);
 
-
-
+    // ===============================
     // Add Item Row
+    // ===============================
+
     const addItem = () => {
 
-        setForm({
-            ...form,
+        setForm(prev => ({
+            ...prev,
             selectedItems: [
-                ...form.selectedItems,
-                { itemId: "", quantity: 1 }
+                ...prev.selectedItems,
+                { itemId: "", qty: 1 }
             ]
-        });
+        }));
 
     };
 
-
+    // ===============================
     // Handle Item Change
+    // ===============================
+
     const handleItemChange = (index, field, value) => {
 
         const updated = [...form.selectedItems];
         updated[index][field] = value;
 
-        setForm({
-            ...form,
+        setForm(prev => ({
+            ...prev,
             selectedItems: updated
-        });
+        }));
 
     };
 
-
-
+    // ===============================
     // Auto Deposit Calculation
+    // ===============================
+
     useEffect(() => {
 
         const total = form.selectedItems.reduce((sum, entry) => {
 
             const item = items.find(i => i._id === entry.itemId);
 
-            return sum + ((item?.depositPerItem || 0) * entry.quantity);
+            return sum + ((item?.depositPerItem || 0) * entry.qty);
 
         }, 0);
 
@@ -96,7 +102,9 @@ const IssueItem = () => {
 
     }, [form.selectedItems, items]);
 
-
+    // ===============================
+    // Submit
+    // ===============================
 
     const handleSubmit = async (e) => {
 
@@ -136,21 +144,20 @@ const IssueItem = () => {
 
             }
 
-
             await API.post("/issues", {
 
                 receiptNo: form.receiptNo,
                 reference: form.reference,
                 patient: patientId,
+
                 items: form.selectedItems.map(i => ({
                     item: i.itemId,
-                    qty: i.quantity
+                    qty: i.qty
                 })),
 
                 totalDeposit: Number(form.totalDeposit)
 
             });
-
 
             setSuccess("Issue created successfully");
 
@@ -180,6 +187,9 @@ const IssueItem = () => {
 
     };
 
+    // ===============================
+    // Date Format
+    // ===============================
 
     const formatDate = (date) => {
 
@@ -190,7 +200,6 @@ const IssueItem = () => {
         });
 
     };
-
 
     return (
 
@@ -209,9 +218,9 @@ const IssueItem = () => {
 
             </div>
 
-
-
-            {/* History */}
+            {/* ===============================
+               History
+            =============================== */}
 
             <div className="history-card">
 
@@ -224,7 +233,7 @@ const IssueItem = () => {
                             <div>
 
                                 <strong>
-                                    {issue.patient?.patientName}
+                                    {issue.patient?.patientName || "Unknown"}
                                 </strong>
 
                                 <div className="issue-date">
@@ -233,16 +242,14 @@ const IssueItem = () => {
 
                                 <div>
                                     {issue.items?.map(i =>
-                                        `${i.item?.itemName} x ${i.quantity}`
+                                        `${i.item?.itemName || "Item"} x ${i.qty}`
                                     ).join(", ")}
                                 </div>
 
                             </div>
 
                             <div>
-
                                 ₹{issue.totalDeposit}
-
                             </div>
 
                         </div>
@@ -253,9 +260,9 @@ const IssueItem = () => {
 
             </div>
 
-
-
-            {/* Modal */}
+            {/* ===============================
+               Modal
+            =============================== */}
 
             {showForm && (
 
@@ -275,8 +282,6 @@ const IssueItem = () => {
                             </button>
 
                         </div>
-
-
 
                         <form
                             className="modal-form"
@@ -299,7 +304,6 @@ const IssueItem = () => {
                                     />
                                 </div>
 
-
                                 <div className="form-group">
                                     <label>Patient Name</label>
                                     <input
@@ -313,8 +317,6 @@ const IssueItem = () => {
                                         }
                                     />
                                 </div>
-
-
 
                                 <div className="form-group">
                                     <label>Mobile</label>
@@ -330,8 +332,6 @@ const IssueItem = () => {
                                     />
                                 </div>
 
-
-
                                 <div className="form-group">
                                     <label>Reference</label>
                                     <input
@@ -346,8 +346,6 @@ const IssueItem = () => {
                                     />
                                 </div>
 
-
-
                                 <div className="form-group full">
                                     <label>Address</label>
                                     <textarea
@@ -360,8 +358,6 @@ const IssueItem = () => {
                                         }
                                     />
                                 </div>
-
-
 
                                 {/* Items */}
 
@@ -394,25 +390,21 @@ const IssueItem = () => {
                                                         key={item._id}
                                                         value={item._id}
                                                     >
-
                                                         {item.itemName}
-
                                                     </option>
 
                                                 ))}
 
                                             </select>
 
-
-
                                             <input
                                                 type="number"
                                                 min="1"
-                                                value={entry.quantity}
+                                                value={entry.qty}
                                                 onChange={(e) =>
                                                     handleItemChange(
                                                         index,
-                                                        "quantity",
+                                                        "qty",
                                                         Number(e.target.value)
                                                     )
                                                 }
@@ -421,8 +413,6 @@ const IssueItem = () => {
                                         </div>
 
                                     ))}
-
-
 
                                     <button
                                         type="button"
@@ -433,8 +423,6 @@ const IssueItem = () => {
                                     </button>
 
                                 </div>
-
-
 
                                 <div className="form-group">
                                     <label>Total Deposit</label>
@@ -447,8 +435,6 @@ const IssueItem = () => {
 
                             </div>
 
-
-
                             <button
                                 className="submit-btn"
                                 disabled={loading}
@@ -457,8 +443,6 @@ const IssueItem = () => {
                                 {loading ? "Processing..." : "Confirm Issue"}
 
                             </button>
-
-
 
                             {error && (
                                 <div className="alert error">

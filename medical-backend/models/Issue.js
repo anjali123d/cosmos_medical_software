@@ -1,45 +1,39 @@
 const mongoose = require("mongoose");
 
-const issueSchema = new mongoose.Schema({
+const IssueSchema = new mongoose.Schema(
+    {
+        receiptNo: String,
 
-    patient: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
-        required: true
-    },
+        reference: String,
 
-    receiptNo: {
-        type: String,
-        required: true
-    },
+        patient: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Patient"
+        },
 
-    reference: String,
-
-    items: [
-        {
-            item: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "MedicalItem"
-            },
-            qty: {
-                type: Number,
-                default: 1
+        items: [
+            {
+                item: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "MedicalItem"
+                },
+                qty: {
+                    type: Number,
+                    default: 1
+                }
             }
-        }
-    ],
+        ],
 
-    totalDeposit: {
-        type: Number,
-        required: true
+        totalDeposit: Number,
+
+        isReturned: {
+            type: Boolean,
+            default: false
+        },
+
+        returnedAt: Date
     },
+    { timestamps: true }
+);
 
-    isReturned: {
-        type: Boolean,
-        default: false
-    },
-
-    returnedAt: Date
-
-}, { timestamps: true });
-
-module.exports = mongoose.model("Issue", issueSchema);
+module.exports = mongoose.model("Issue", IssueSchema);
