@@ -218,18 +218,40 @@ input[type="number"] {
     cursor: default;
 }
 
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
+.return-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin-top: 10px;
 }
 
-.history-table th,
-.history-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+.return-history-card {
+    background: white;
+    padding: 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #4CAF50;
 }
 
-.history-table th {
-    background: #f5f5f5;
+.history-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.label {
+    font-weight: 600;
+    color: #555;
+}
+
+.refund {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.no-history {
+    text-align: center;
+    padding: 20px;
+    color: #777;
 }

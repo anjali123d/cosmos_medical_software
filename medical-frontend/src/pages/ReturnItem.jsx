@@ -17,7 +17,7 @@ const ReturnItem = () => {
     });
     const fetchReturnHistory = async () => {
         try {
-            const res = await API.get("/returns/history");
+            const res = await API.get("/returns");
             setReturns(res.data);
         } catch {
             setError("Failed to load return history");
@@ -175,36 +175,53 @@ const ReturnItem = () => {
             </div>
             <div className="card">
                 <h2>Return History</h2>
+                <div className="return-history-list">
+                    {returns.length === 0 && (
+                        <div className="no-history">No return history found</div>
+                    )}
 
-                <table className="history-table">
-                    <thead>
-                        <tr>
-                            <th>Patient</th>
-                            <th>Item</th>
-                            <th>Qty</th>
-                            <th>Deposit</th>
-                            <th>Damage</th>
-                            <th>Refund</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
+                    {returns.map((r) => (
+                        <div key={r._id} className="return-history-card">
 
-                    <tbody>
-                        {returns.map((r) => (
-                            <tr key={r._id}>
-                                <td>{r.issue?.patient?.patientName}</td>
-                                <td>{r.issue?.item?.itemName}</td>
-                                <td>{r.issue?.qty}</td>
-                                <td>₹{r.issue?.totalDeposit}</td>
-                                <td>₹{r.damageCharge}</td>
-                                <td>₹{r.refundAmount}</td>
-                                <td>
-                                    {new Date(r.createdAt).toLocaleDateString()}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                            <div className="history-row">
+                                <span className="label">Patient</span>
+                                <span>{r.issue?.patient?.patientName}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Item</span>
+                                <span>{r.issue?.item?.itemName}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Qty</span>
+                                <span>{r.issue?.qty}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Deposit</span>
+                                <span>₹{r.issue?.totalDeposit}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Damage</span>
+                                <span>₹{r.damageCharge}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Refund</span>
+                                <span className="refund">₹{r.refundAmount}</span>
+                            </div>
+
+                            <div className="history-row">
+                                <span className="label">Date</span>
+                                <span>{new Date(r.createdAt).toLocaleDateString()}</span>
+                            </div>
+
+                        </div>
+                    ))}
+                </div>
+
             </div>
         </div>
     );
