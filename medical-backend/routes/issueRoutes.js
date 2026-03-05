@@ -4,7 +4,7 @@ const Issue = require("../models/Issue");
 const MedicalItem = require("../models/MedicalItem");
 
 // Create 
-Issuerouter.post("/", async (req, res) => {
+router.post("/", async (req, res) => {
     try {
 
         const { patient, items, receiptNo, reference, totalDeposit } = req.body;
