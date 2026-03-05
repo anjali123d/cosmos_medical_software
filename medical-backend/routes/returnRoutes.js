@@ -54,9 +54,28 @@ router.post("/", async (req, res) => {
         res.status(500).json({ message: "Return failed" });
     }
 });
+/* ===============================
+   GET : Return History
+================================ */
+router.get("/history", async (req, res) => {
+    try {
+        const returns = await Return.find()
+            .populate({
+                path: "issue",
+                populate: ["patient", "item"]
+            })
+            .sort({ createdAt: -1 });
+
+        res.json(returns);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch returns" });
+    }
+});
 
 /* ===============================
-   GET : All Returns (History)
+   GET : All Returns
 ================================ */
 router.get("/", async (req, res) => {
     try {
@@ -74,7 +93,7 @@ router.get("/", async (req, res) => {
 });
 
 /* ===============================
-   GET : Single Return (Optional)
+   GET : Single Return
 ================================ */
 router.get("/:id", async (req, res) => {
     try {
@@ -91,22 +110,6 @@ router.get("/:id", async (req, res) => {
         res.json(returnItem);
     } catch (err) {
         res.status(500).json({ message: "Failed to fetch return" });
-    }
-});
-router.get("/history", async (req, res) => {
-    try {
-
-        const returns = await Return.find()
-            .populate({
-                path: "issue",
-                populate: ["patient", "item"]
-            })
-            .sort({ createdAt: -1 });
-
-        res.json(returns);
-
-    } catch (err) {
-        res.status(500).json({ message: "Failed to fetch returns" });
     }
 });
 module.exports = router;
