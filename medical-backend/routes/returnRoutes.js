@@ -9,30 +9,53 @@ const MedicalItem = require("../models/MedicalItem");
 ================================ */
 router.post("/", async (req, res) => {
 
-    const { issueId, itemId, qty } = req.body;
+    try {
 
-    const issue = await Issue.findById(issueId);
+        const { issueId, itemId, qty, damageCharge = 0 } = req.body;
 
-    const issueItem = issue.items.find(i => i.item.toString() === itemId);
+        const issue = await Issue.findById(issueId);
 
-    if (!issueItem) {
-        return res.status(404).json({ message: "Item not found in issue" });
+        if (!issue) {
+            return res.status(404).json({ message: "Issue not found" });
+        }
+
+        const issueItem = issue.items.find(
+            i => i.item.toString() === itemId
+        );
+
+        if (!issueItem) {
+            return res.status(404).json({ message: "Item not found in issue" });
+        }
+
+        if (qty > issueItem.qty) {
+            return res.status(400).json({ message: "Invalid quantity" });
+        }
+
+        const medicalItem = await MedicalItem.findById(itemId);
+
+        medicalItem.totalStock += qty;
+        await medicalItem.save();
+
+        issueItem.qty -= qty;
+
+        await issue.save();
+
+        const refundAmount = issue.totalDeposit - damageCharge;
+
+        const newReturn = await Return.create({
+            issue: issueId,
+            damageCharge,
+            refundAmount
+        });
+
+        res.json(newReturn);
+
+    } catch (err) {
+
+        console.error(err);
+        res.status(500).json({ message: "Return failed" });
+
     }
-
-    if (qty > issueItem.qty) {
-        return res.status(400).json({ message: "Invalid quantity" });
-    }
-
-    const medicalItem = await MedicalItem.findById(itemId);
-
-    medicalItem.totalStock += qty;
-    await medicalItem.save();
-
-    issueItem.qty -= qty;
-
-    await issue.save();
-
-    res.json({ message: "Item returned successfully" });
 
 });
 /* ===============================

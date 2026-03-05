@@ -87,6 +87,8 @@ const ReturnItem = () => {
             setLoading(true);
             await API.post("/returns", {
                 issueId: form.issueId,
+                itemId: selectedItemId,
+                qty: 1,
                 damageCharge: Number(form.damageCharge)
             });
             fetchReturnHistory(); // history refresh
@@ -146,7 +148,7 @@ const ReturnItem = () => {
                                             {issue.patient?.patientName}
                                         </div>
                                         <div className="suggestion-sub">
-                                            {issue.item?.itemName} (Qty: {issue.qty})
+                                            {issue.items?.map(i => `${i.item?.itemName} (Qty:${i.qty})`).join(", ")}
                                         </div>
                                     </div>
                                 ))}
@@ -199,12 +201,12 @@ const ReturnItem = () => {
 
                             <div className="history-row">
                                 <span className="label">Item</span>
-                                <span>{r.issue?.item?.itemName}</span>
+                                <span>{r.issue?.items?.map(i => i.item?.itemName).join(", ")}</span>
                             </div>
 
                             <div className="history-row">
                                 <span className="label">Qty</span>
-                                <span>{r.issue?.qty}</span>
+                                <span>{r.issue?.items?.map(i => i.qty).join(", ")}</span>
                             </div>
 
                             <div className="history-row">

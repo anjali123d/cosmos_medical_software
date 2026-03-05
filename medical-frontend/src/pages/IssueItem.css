@@ -470,3 +470,33 @@ textarea {
     }
 
 }
+
+.add-item-btn {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.add-item-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.add-item-btn:active {
+    transform: scale(0.96);
+}
+
+.add-item-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}

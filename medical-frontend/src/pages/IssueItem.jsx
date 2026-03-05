@@ -142,10 +142,9 @@ const IssueItem = () => {
                 receiptNo: form.receiptNo,
                 reference: form.reference,
                 patient: patientId,
-
                 items: form.selectedItems.map(i => ({
                     item: i.itemId,
-                    quantity: i.quantity
+                    qty: i.quantity
                 })),
 
                 totalDeposit: Number(form.totalDeposit)

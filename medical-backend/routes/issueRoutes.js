@@ -59,7 +59,7 @@ router.get("/", async (req, res) => {
 
         const issues = await Issue.find()
             .populate("patient")
-            .populate("items")
+            .populate("items.item")
             .sort({ createdAt: -1 });
 
         res.json(issues);
@@ -75,7 +75,7 @@ router.get("/active", async (req, res) => {
     try {
         const issues = await Issue.find({ isReturned: false })
             .populate("patient")
-            .populate("items")
+            .populate("items.item")
             .sort({ createdAt: -1 });
 
         res.json(issues);
