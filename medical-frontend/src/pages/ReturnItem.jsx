@@ -10,12 +10,19 @@ const ReturnItem = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-
+    const [returns, setReturns] = useState([]);
     const [form, setForm] = useState({
         issueId: "",
         damageCharge: 0
     });
-
+    const fetchReturnHistory = async () => {
+        try {
+            const res = await API.get("/returns/history");
+            setReturns(res.data);
+        } catch {
+            setError("Failed to load return history");
+        }
+    };
     const wrapperRef = useRef(null);
 
     const fetchIssues = async () => {
@@ -29,6 +36,7 @@ const ReturnItem = () => {
 
     useEffect(() => {
         fetchIssues();
+        fetchReturnHistory();
     }, []);
 
     // Close suggestion if click outside
@@ -72,7 +80,7 @@ const ReturnItem = () => {
                 issueId: form.issueId,
                 damageCharge: Number(form.damageCharge)
             });
-
+            fetchReturnHistory(); // history refresh
             setSuccess("✅ Item Returned Successfully");
             fetchIssues();
             setForm({ issueId: "", damageCharge: 0 });
@@ -84,6 +92,8 @@ const ReturnItem = () => {
         } finally {
             setLoading(false);
         }
+
+
     };
 
     return (
@@ -162,6 +172,39 @@ const ReturnItem = () => {
                     {success && <div className="alert success-alert"><CheckCircle size={16} /> {success}</div>}
 
                 </form>
+            </div>
+            <div className="card">
+                <h2>Return History</h2>
+
+                <table className="history-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Deposit</th>
+                            <th>Damage</th>
+                            <th>Refund</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {returns.map((r) => (
+                            <tr key={r._id}>
+                                <td>{r.issue?.patient?.patientName}</td>
+                                <td>{r.issue?.item?.itemName}</td>
+                                <td>{r.issue?.qty}</td>
+                                <td>₹{r.issue?.totalDeposit}</td>
+                                <td>₹{r.damageCharge}</td>
+                                <td>₹{r.refundAmount}</td>
+                                <td>
+                                    {new Date(r.createdAt).toLocaleDateString()}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
