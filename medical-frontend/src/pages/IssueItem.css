@@ -39,10 +39,11 @@
     padding: 0.8rem;
     transition: 0.3s ease;
 }
-.history-item
-{
+
+.history-item {
     border: solid 1px rgba(0, 0, 0, 0.801);
 }
+
 .form-card:hover,
 .history-card:hover {
     transform: translateY(-3px);
@@ -322,4 +323,150 @@ textarea {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Overlay */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    padding: 10px;
+}
+
+/* Modal Card */
+
+.modal-card {
+    width: 100%;
+    max-width: 700px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Header */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Form */
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Grid */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Full width */
+
+.form-group.full {
+    grid-column: span 2;
+}
+
+/* Inputs */
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+textarea {
+    resize: none;
+    height: 70px;
+}
+
+/* Multi select */
+
+.multi-select {
+    height: 120px;
+}
+
+/* Button */
+
+.submit-btn {
+    margin-top: 18px;
+    padding: 12px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Alerts */
+
+.alert {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.alert.error {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.alert.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Mobile Responsive */
+
+@media (max-width: 600px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: span 1;
+    }
+
 }

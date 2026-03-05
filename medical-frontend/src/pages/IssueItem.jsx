@@ -165,68 +165,97 @@ const IssueItem = () => {
             {showForm && (
                 <div className="modal-overlay">
                     <div className="modal-card">
+
                         <div className="modal-header">
                             <h3>New Issue Entry</h3>
-                            <button onClick={() => setShowForm(false)}>✕</button>
+                            <button className="close-btn" onClick={() => setShowForm(false)}>✕</button>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
-                            <input
-                                type="text"
-                                placeholder="Receipt Number"
-                                value={form.receiptNo}
-                                onChange={e => setForm({ ...form, receiptNo: e.target.value })}
-                            />
+                        <form className="modal-form" onSubmit={handleSubmit}>
 
+                            <div className="form-grid">
 
+                                <div className="form-group">
+                                    <label>Receipt Number</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter receipt number"
+                                        value={form.receiptNo}
+                                        onChange={e => setForm({ ...form, receiptNo: e.target.value })}
+                                    />
+                                </div>
 
-                            <input
-                                type="text"
-                                placeholder="Patient Name"
-                                value={form.patientName}
-                                onChange={e => setForm({ ...form, patientName: e.target.value })}
-                            />
+                                <div className="form-group">
+                                    <label>Patient Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter patient name"
+                                        value={form.patientName}
+                                        onChange={e => setForm({ ...form, patientName: e.target.value })}
+                                    />
+                                </div>
 
-                            <input
-                                type="text"
-                                placeholder="Mobile"
-                                value={form.mobile}
-                                onChange={e => setForm({ ...form, mobile: e.target.value })}
-                            />
+                                <div className="form-group">
+                                    <label>Mobile</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter mobile number"
+                                        value={form.mobile}
+                                        onChange={e => setForm({ ...form, mobile: e.target.value })}
+                                    />
+                                </div>
 
-                            <textarea
-                                placeholder="Address"
-                                value={form.address}
-                                onChange={e => setForm({ ...form, address: e.target.value })}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Reference"
-                                value={form.reference}
-                                onChange={e => setForm({ ...form, reference: e.target.value })}
-                            />
-                            <select
-                                multiple
-                                onChange={(e) => {
-                                    const selected = Array.from(
-                                        e.target.selectedOptions,
-                                        option => option.value
-                                    );
-                                    setForm({ ...form, selectedItems: selected });
-                                }}
-                            >
-                                {items.map(item => (
-                                    <option key={item._id} value={item._id}>
-                                        {item.itemName}
-                                    </option>
-                                ))}
-                            </select>
+                                <div className="form-group">
+                                    <label>Reference</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Doctor / Reference"
+                                        value={form.reference}
+                                        onChange={e => setForm({ ...form, reference: e.target.value })}
+                                    />
+                                </div>
 
-                            <input
-                                type="number"
-                                value={form.totalDeposit}
-                                onChange={e => setForm({ ...form, totalDeposit: e.target.value })}
-                            />
+                                <div className="form-group full">
+                                    <label>Address</label>
+                                    <textarea
+                                        placeholder="Enter address"
+                                        value={form.address}
+                                        onChange={e => setForm({ ...form, address: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="form-group full">
+                                    <label>Select Items</label>
+                                    <select
+                                        multiple
+                                        className="multi-select"
+                                        onChange={(e) => {
+                                            const selected = Array.from(
+                                                e.target.selectedOptions,
+                                                option => option.value
+                                            );
+                                            setForm({ ...form, selectedItems: selected });
+                                        }}
+                                    >
+                                        {items.map(item => (
+                                            <option key={item._id} value={item._id}>
+                                                {item.itemName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Total Deposit</label>
+                                    <input
+                                        type="number"
+                                        placeholder="₹ Amount"
+                                        value={form.totalDeposit}
+                                        onChange={e => setForm({ ...form, totalDeposit: e.target.value })}
+                                    />
+                                </div>
+
+                            </div>
 
                             <button className="submit-btn" disabled={loading}>
                                 {loading ? "Processing..." : "Confirm Issue"}
@@ -234,6 +263,7 @@ const IssueItem = () => {
 
                             {error && <div className="alert error">{error}</div>}
                             {success && <div className="alert success">{success}</div>}
+
                         </form>
                     </div>
                 </div>
