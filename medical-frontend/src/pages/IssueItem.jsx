@@ -394,7 +394,7 @@ const IssueItem = () => {
                             </div>
 
                             <div className="form-group"><label>Total Deposit</label>
-                                <input type="number" value={form.totalDeposit} readOnly />
+                                <input type="number" value={form.totalDeposit} />
                             </div>
 
                             <button type="submit" className="submit-btn" disabled={loading}>
