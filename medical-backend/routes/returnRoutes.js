@@ -7,11 +7,16 @@ const MedicalItem = require("../models/MedicalItem");
 /* ===============================
    POST : Return Item
 ================================ */
+
 router.post("/", async (req, res) => {
 
     try {
 
         const { issueId, itemId, qty, damageCharge = 0 } = req.body;
+
+        if (!issueId || !itemId || !qty) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
 
         const issue = await Issue.findById(issueId);
 
@@ -27,21 +32,38 @@ router.post("/", async (req, res) => {
             return res.status(404).json({ message: "Item not in issue" });
         }
 
-        const remaining = issueItem.qty - issueItem.returnedQty;
+        const remaining = issueItem.qty - (issueItem.returnedQty || 0);
 
         if (qty > remaining) {
-            return res.status(400).json({ message: "Return qty exceeds" });
+            return res.status(400).json({
+                message: `Max return allowed: ${remaining}`
+            });
         }
 
-        issueItem.returnedQty += qty;
+        /* update returned qty */
+
+        issueItem.returnedQty = (issueItem.returnedQty || 0) + qty;
+
+        /* update stock */
 
         const item = await MedicalItem.findById(itemId);
+
+        if (!item) {
+            return res.status(404).json({ message: "Item not found" });
+        }
 
         item.totalStock += qty;
 
         await item.save();
 
-        const refundAmount = (item.depositPerItem * qty) - damageCharge;
+        /* refund calculation */
+
+        const refundAmount = Math.max(
+            (item.depositPerItem * qty) - damageCharge,
+            0
+        );
+
+        /* save return */
 
         await Return.create({
             issue: issueId,
@@ -54,7 +76,7 @@ router.post("/", async (req, res) => {
         /* check full return */
 
         const allReturned = issue.items.every(
-            i => i.qty === i.returnedQty
+            i => i.qty === (i.returnedQty || 0)
         );
 
         if (allReturned) {
@@ -64,20 +86,30 @@ router.post("/", async (req, res) => {
 
         await issue.save();
 
-        res.json({ message: "Return success" });
+        res.json({
+            message: "Return successful",
+            refundAmount
+        });
 
     } catch (err) {
 
         console.log(err);
-        res.status(500).json({ message: "Return failed" });
+
+        res.status(500).json({
+            message: "Return failed"
+        });
 
     }
 
 });
+
+
 /* ===============================
    GET : Return History
 ================================ */
+
 router.get("/history", async (req, res) => {
+
     try {
 
         const returns = await Return.find()
@@ -96,15 +128,20 @@ router.get("/history", async (req, res) => {
     } catch (err) {
 
         console.error(err);
-        res.status(500).json({ message: "Failed to fetch returns" });
+
+        res.status(500).json({
+            message: "Failed to fetch returns"
+        });
 
     }
+
 });
 
 
 /* ===============================
    GET : All Returns
 ================================ */
+
 router.get("/", async (req, res) => {
 
     try {
@@ -125,7 +162,10 @@ router.get("/", async (req, res) => {
     } catch (err) {
 
         console.error(err);
-        res.status(500).json({ message: "Failed to fetch returns" });
+
+        res.status(500).json({
+            message: "Failed to fetch returns"
+        });
 
     }
 
@@ -135,6 +175,7 @@ router.get("/", async (req, res) => {
 /* ===============================
    GET : Single Return
 ================================ */
+
 router.get("/:id", async (req, res) => {
 
     try {
@@ -158,11 +199,13 @@ router.get("/:id", async (req, res) => {
     } catch (err) {
 
         console.error(err);
-        res.status(500).json({ message: "Failed to fetch return" });
+
+        res.status(500).json({
+            message: "Failed to fetch return"
+        });
 
     }
 
 });
-
 
 module.exports = router;

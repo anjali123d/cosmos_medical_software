@@ -125,28 +125,27 @@ const ReturnItem = () => {
             return;
         }
 
-        if (Number(form.qty) > selectedItem.qty) {
-            setError(
-                `Max return allowed: ${selectedItem.qty}`
-            );
+        const remaining =
+            selectedItem.qty - (selectedItem.returnedQty || 0);
+
+        if (Number(form.qty) > remaining) {
+
+            setError(`Max return allowed: ${remaining}`);
             return;
+
         }
 
         try {
 
             setLoading(true);
 
-            const refundAmount =
-                (selectedItem.item.depositPerItem *
-                    Number(form.qty)) -
-                Number(form.damageCharge || 0);
+            const res = await API.post("/returns", {
 
-            await API.post("/returns", {
                 issueId: form.issueId,
                 itemId: form.itemId,
                 qty: Number(form.qty),
-                damageCharge: Number(form.damageCharge),
-                refundAmount: Number(refundAmount)
+                damageCharge: Number(form.damageCharge)
+
             });
 
             fetchReturns();
@@ -162,9 +161,11 @@ const ReturnItem = () => {
             setSelectedIssue(null);
             setSearchTerm("");
 
-            setSuccess("Item returned successfully");
+            setSuccess(
+                `Item returned successfully. Refund: ₹${Math.max(res.data.refundAmount, 0)}`
+            );
 
-            setTimeout(() => setSuccess(""), 3000);
+            setTimeout(() => setSuccess(""), 4000);
 
         } catch (err) {
 
@@ -180,6 +181,14 @@ const ReturnItem = () => {
         }
 
     };
+
+    const selectedItem = selectedIssue?.items.find(
+        i => i.item._id === form.itemId
+    );
+
+    const remainingQty = selectedItem
+        ? selectedItem.qty - (selectedItem.returnedQty || 0)
+        : 1;
 
     return (
 
@@ -275,7 +284,7 @@ const ReturnItem = () => {
                                     {" "}
                                     (Remaining:
                                     {" "}
-                                    {i.qty})
+                                    {i.qty - (i.returnedQty || 0)})
 
                                 </option>
 
@@ -294,13 +303,7 @@ const ReturnItem = () => {
                         <input
                             type="number"
                             min="1"
-                            max={
-                                selectedIssue?.items.find(
-                                    i =>
-                                        i.item._id ===
-                                        form.itemId
-                                )?.qty || 1
-                            }
+                            max={remainingQty}
                             value={form.qty}
                             onChange={(e) =>
                                 setForm({

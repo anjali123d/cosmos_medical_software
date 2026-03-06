@@ -12,14 +12,23 @@ const returnSchema = new mongoose.Schema({
         ref: "MedicalItem"
     },
 
-    qty: Number,
+    qty: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+
 
     damageCharge: {
         type: Number,
         default: 0
     },
 
-    refundAmount: Number
+
+    refundAmount: {
+        type: Number,
+        default: 0
+    }
 
 }, { timestamps: true });
 
