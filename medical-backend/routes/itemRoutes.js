@@ -37,5 +37,15 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ message: "Error deleting item", error });
     }
 });
+router.get("/search/item", async (req, res) => {
 
+    const q = req.query.q;
+
+    const items = await MedicalItem.find({
+        itemName: { $regex: q, $options: "i" }
+    }).limit(10);
+
+    res.json(items);
+
+});
 module.exports = router;

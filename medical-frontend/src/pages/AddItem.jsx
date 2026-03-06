@@ -63,6 +63,7 @@ const AddItem = () => {
                     depositPerItem: Number(form.depositPerItem)
                 });
                 setSuccess("Item updated successfully!");
+                setShowForm(false);
             } else {
                 await API.post("/items", {
                     itemName: form.itemName,
@@ -100,6 +101,7 @@ const AddItem = () => {
         try {
             await API.delete(`/items/${id}`);
             fetchItems();
+
         } catch {
             setError("Could not delete item.");
         }

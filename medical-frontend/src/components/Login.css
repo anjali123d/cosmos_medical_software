@@ -55,6 +55,7 @@
     font-size: 0.95rem;
 }
 
+
 .login-btn {
     padding: 0.7rem;
     background: #2563eb;
@@ -171,4 +172,11 @@
     .input-group {
         gap: 0.4rem;
     }
+}
+
+input:focus {
+    background-color: none;
+    outline: none;
+    border: solid 1px;
+    border: none;
 }

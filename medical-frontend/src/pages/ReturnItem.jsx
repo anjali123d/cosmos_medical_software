@@ -10,49 +10,52 @@ const ReturnItem = () => {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [selectedIssue, setSelectedIssue] = useState(null);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    const wrapperRef = useRef(null);
+
     const [form, setForm] = useState({
         issueId: "",
+        itemId: "",
+        qty: 1,
         damageCharge: 0
     });
 
-    const wrapperRef = useRef(null);
+    /* ======================
+       FETCH DATA
+    ====================== */
 
-    // Fetch Active Issues
     const fetchIssues = async () => {
-        try {
-            const res = await API.get("/issues/active");
-            setIssues(res.data);
-        } catch {
-            setError("Failed to load issued items");
-        }
+        const res = await API.get("/issues/active");
+        setIssues(res.data);
     };
 
-    // Fetch Return History
-    const fetchReturnHistory = async () => {
-        try {
-            const res = await API.get("/returns");
-            setReturns(res.data);
-        } catch {
-            setError("Failed to load return history");
-        }
+    const fetchReturns = async () => {
+        const res = await API.get("/returns");
+        setReturns(res.data);
     };
 
     useEffect(() => {
         fetchIssues();
-        fetchReturnHistory();
+        fetchReturns();
     }, []);
 
-    // Close suggestion if click outside
+    /* ======================
+       CLOSE SUGGESTION
+    ====================== */
+
     useEffect(() => {
 
         const handleClickOutside = (event) => {
 
-            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+            if (
+                wrapperRef.current &&
+                !wrapperRef.current.contains(event.target)
+            ) {
                 setShowSuggestions(false);
             }
 
@@ -60,52 +63,47 @@ const ReturnItem = () => {
 
         document.addEventListener("mousedown", handleClickOutside);
 
-        return () => {
+        return () =>
             document.removeEventListener("mousedown", handleClickOutside);
-        };
 
     }, []);
 
+    /* ======================
+       SEARCH PATIENT
+    ====================== */
 
-    // Search Filter
     const filteredIssues = useMemo(() => {
 
         if (!searchTerm) return [];
 
-        return issues.filter(issue => {
-
-            const itemNames = issue.items
-                ?.map(i => i.item?.itemName?.toLowerCase())
-                .join(" ");
-
-            return (
-                issue.patient?.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                itemNames?.includes(searchTerm.toLowerCase())
-            );
-
-        });
+        return issues.filter(issue =>
+            issue.patient?.patientName
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        );
 
     }, [issues, searchTerm]);
 
+    const handleSelectIssue = (issue) => {
 
-    // Select suggestion
-    const handleSelect = (issue) => {
+        setSelectedIssue(issue);
 
         setForm({
-            ...form,
-            issueId: issue._id
+            issueId: issue._id,
+            itemId: "",
+            qty: 1,
+            damageCharge: 0
         });
 
-        setSearchTerm(
-            `${issue.patient?.patientName} - ${issue.items?.map(i => i.item?.itemName).join(", ")}`
-        );
-
+        setSearchTerm(issue.patient?.patientName || "");
         setShowSuggestions(false);
 
     };
 
+    /* ======================
+       RETURN SUBMIT
+    ====================== */
 
-    // Submit Return
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -113,8 +111,24 @@ const ReturnItem = () => {
         setError("");
         setSuccess("");
 
-        if (!form.issueId) {
-            setError("Please select issued item");
+        if (!form.issueId || !form.itemId) {
+            setError("Select patient and item");
+            return;
+        }
+
+        const selectedItem = selectedIssue.items.find(
+            i => i.item._id === form.itemId
+        );
+
+        if (!selectedItem) {
+            setError("Item not found in issue");
+            return;
+        }
+
+        if (Number(form.qty) > selectedItem.qty) {
+            setError(
+                `Max return allowed: ${selectedItem.qty}`
+            );
             return;
         }
 
@@ -122,28 +136,42 @@ const ReturnItem = () => {
 
             setLoading(true);
 
+            const refundAmount =
+                (selectedItem.item.depositPerItem *
+                    Number(form.qty)) -
+                Number(form.damageCharge || 0);
+
             await API.post("/returns", {
                 issueId: form.issueId,
-                damageCharge: Number(form.damageCharge)
+                itemId: form.itemId,
+                qty: Number(form.qty),
+                damageCharge: Number(form.damageCharge),
+                refundAmount: Number(refundAmount)
             });
 
-            setSuccess("Item Returned Successfully");
-
+            fetchReturns();
             fetchIssues();
-            fetchReturnHistory();
 
             setForm({
                 issueId: "",
+                itemId: "",
+                qty: 1,
                 damageCharge: 0
             });
 
+            setSelectedIssue(null);
             setSearchTerm("");
+
+            setSuccess("Item returned successfully");
 
             setTimeout(() => setSuccess(""), 3000);
 
         } catch (err) {
 
-            setError(err.response?.data?.message || "Return failed");
+            setError(
+                err.response?.data?.message ||
+                "Return failed"
+            );
 
         } finally {
 
@@ -152,7 +180,6 @@ const ReturnItem = () => {
         }
 
     };
-
 
     return (
 
@@ -170,76 +197,126 @@ const ReturnItem = () => {
 
                 <form onSubmit={handleSubmit}>
 
-                    {/* SEARCH */}
+                    {/* PATIENT SEARCH */}
 
                     <div className="input-field" ref={wrapperRef}>
 
                         <label>
-                            <Search size={14} /> Search Patient / Item
+                            <Search size={14} />
+                            Search Patient
                         </label>
 
                         <input
                             type="text"
-                            placeholder="Search patient or item"
+                            placeholder="Search patient"
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 setShowSuggestions(true);
-                                setForm({ ...form, issueId: "" });
                             }}
-                            onFocus={() => setShowSuggestions(true)}
                         />
 
-                        {showSuggestions && filteredIssues.length > 0 && (
+                        {showSuggestions &&
+                            filteredIssues.length > 0 && (
 
-                            <div className="suggestion-box">
+                                <div className="suggestion-box">
 
-                                {filteredIssues.map(issue => (
+                                    {filteredIssues.map(issue => (
 
-                                    <div
-                                        key={issue._id}
-                                        className="suggestion-item"
-                                        onClick={() => handleSelect(issue)}
-                                    >
+                                        <div
+                                            key={issue._id}
+                                            className="suggestion-item"
+                                            onClick={() =>
+                                                handleSelectIssue(issue)
+                                            }
+                                        >
 
-                                        <div className="suggestion-main">
                                             {issue.patient?.patientName}
+
                                         </div>
 
-                                        <div className="suggestion-sub">
-                                            {issue.items?.map(i =>
-                                                `${i.item?.itemName} (Qty:${i.qty})`
-                                            ).join(", ")}
-                                        </div>
+                                    ))}
 
-                                    </div>
-
-                                ))}
-
-                            </div>
-
-                        )}
-
-                        {showSuggestions && searchTerm && filteredIssues.length === 0 && (
-
-                            <div className="suggestion-box">
-
-                                <div className="suggestion-item no-result">
-                                    No matching records
                                 </div>
 
-                            </div>
-
-                        )}
+                            )}
 
                     </div>
 
+                    {/* ITEM SELECT */}
+
+                    <div className="input-field">
+
+                        <label>Select Item</label>
+
+                        <select
+                            value={form.itemId}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    itemId: e.target.value
+                                })
+                            }
+                            disabled={!selectedIssue}
+                        >
+
+                            <option value="">
+                                Select Item
+                            </option>
+
+                            {selectedIssue?.items.map(i => (
+
+                                <option
+                                    key={i.item._id}
+                                    value={i.item._id}
+                                >
+
+                                    {i.item.itemName}
+                                    {" "}
+                                    (Remaining:
+                                    {" "}
+                                    {i.qty})
+
+                                </option>
+
+                            ))}
+
+                        </select>
+
+                    </div>
+
+                    {/* RETURN QTY */}
+
+                    <div className="input-field">
+
+                        <label>Return Quantity</label>
+
+                        <input
+                            type="number"
+                            min="1"
+                            max={
+                                selectedIssue?.items.find(
+                                    i =>
+                                        i.item._id ===
+                                        form.itemId
+                                )?.qty || 1
+                            }
+                            value={form.qty}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    qty: parseInt(e.target.value) || 1
+                                })
+                            }
+                        />
+
+                    </div>
 
                     {/* DAMAGE */}
 
                     <div className="input-field">
 
-                        <label>Damage / Deduction Charge (₹)</label>
+                        <label>Damage Charge (₹)</label>
 
                         <input
                             type="number"
@@ -248,13 +325,15 @@ const ReturnItem = () => {
                             onChange={(e) =>
                                 setForm({
                                     ...form,
-                                    damageCharge: e.target.value
+                                    damageCharge:
+                                        parseInt(
+                                            e.target.value
+                                        ) || 0
                                 })
                             }
                         />
 
                     </div>
-
 
                     <button
                         type="submit"
@@ -262,27 +341,39 @@ const ReturnItem = () => {
                         disabled={loading}
                     >
 
-                        {loading ? "Processing..." : "Confirm Return"}
+                        {loading
+                            ? "Processing..."
+                            : "Confirm Return"}
 
                     </button>
 
-
                     {error && (
+
                         <div className="alert error-alert">
-                            <AlertCircle size={16} /> {error}
+
+                            <AlertCircle size={16} />
+                            {" "}
+                            {error}
+
                         </div>
+
                     )}
 
                     {success && (
+
                         <div className="alert success-alert">
-                            <CheckCircle size={16} /> {success}
+
+                            <CheckCircle size={16} />
+                            {" "}
+                            {success}
+
                         </div>
+
                     )}
 
                 </form>
 
             </div>
-
 
             {/* RETURN HISTORY */}
 
@@ -292,64 +383,49 @@ const ReturnItem = () => {
 
                 <div className="return-history-list">
 
-                    {returns.length === 0 && (
-                        <div className="no-history">
-                            No return history
-                        </div>
-                    )}
-
-                    {returns.map((r) => (
+                    {returns.map(r => (
 
                         <div
                             key={r._id}
                             className="return-history-card"
                         >
 
-                            <div className="history-row">
-                                <span className="label">Patient</span>
-                                <span>{r.issue?.patient?.patientName}</span>
+                            <div>
+                                <strong>Patient:</strong>
+                                {" "}
+                                {r.issue?.patient?.patientName}
                             </div>
 
-                            <div className="history-row">
-                                <span className="label">Item</span>
-                                <span>
-                                    {r.issue?.items?.map(i =>
-                                        i.item?.itemName
-                                    ).join(", ")}
-                                </span>
+                            <div>
+                                <strong>Item:</strong>
+                                {" "}
+                                {r.itemId?.itemName}
                             </div>
 
-                            <div className="history-row">
-                                <span className="label">Qty</span>
-                                <span>
-                                    {r.issue?.items?.map(i =>
-                                        i.qty
-                                    ).join(", ")}
-                                </span>
+                            <div>
+                                <strong>Qty:</strong>
+                                {" "}
+                                {r.qty}
                             </div>
 
-                            <div className="history-row">
-                                <span className="label">Deposit</span>
-                                <span>₹{r.issue?.totalDeposit}</span>
+                            <div>
+                                <strong>Damage:</strong>
+                                {" "}
+                                ₹{r.damageCharge}
                             </div>
 
-                            <div className="history-row">
-                                <span className="label">Damage</span>
-                                <span>₹{r.damageCharge}</span>
+                            <div>
+                                <strong>Refund:</strong>
+                                {" "}
+                                ₹{r.refundAmount}
                             </div>
 
-                            <div className="history-row">
-                                <span className="label">Refund</span>
-                                <span className="refund">
-                                    ₹{r.refundAmount}
-                                </span>
-                            </div>
-
-                            <div className="history-row">
-                                <span className="label">Date</span>
-                                <span>
-                                    {new Date(r.createdAt).toLocaleDateString()}
-                                </span>
+                            <div>
+                                <strong>Date:</strong>
+                                {" "}
+                                {new Date(
+                                    r.createdAt
+                                ).toLocaleDateString()}
                             </div>
 
                         </div>

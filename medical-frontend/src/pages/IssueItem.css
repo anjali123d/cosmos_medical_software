@@ -94,7 +94,7 @@ textarea {
     background: #f8fafc;
     font-size: 0.95rem;
     transition: all 0.25s ease;
-    margin-top: 10px;
+
 }
 
 input:hover,
@@ -499,4 +499,81 @@ textarea {
 .add-item-btn:disabled {
     background: #94a3b8;
     cursor: not-allowed;
+}
+
+.date-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.date-filter input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.remarks {
+    font-size: 13px;
+    color: #555;
+    margin-top: 4px;
+}
+
+.issued-badge {
+    background: #e6f4ff;
+    color: #1677ff;
+    padding: 3px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    margin-left: 8px;
+}
+
+.returned-badge {
+    background: #e6ffed;
+    color: #2ecc71;
+    padding: 3px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    margin-left: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.edit-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.edit-btn:hover {
+    background: #1d4ed8;
+}
+
+.delete-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+}
+
+.receipt-no {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 4px;
+    font-weight: 500;
 }

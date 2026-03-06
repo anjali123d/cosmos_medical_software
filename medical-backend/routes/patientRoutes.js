@@ -51,5 +51,25 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+router.get("/search/patient", async (req, res) => {
 
+    const q = req.query.q;
+
+    const patients = await Patient.find({
+        patientName: { $regex: q, $options: "i" }
+    }).limit(10);
+
+    res.json(patients);
+
+});
+router.get("/active-patients", async (req, res) => {
+
+    const issues = await Issue.find({
+        isReturned: false
+    })
+        .populate("patient");
+
+    res.json(issues);
+
+});
 module.exports = router;

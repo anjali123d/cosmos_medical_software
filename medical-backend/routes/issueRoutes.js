@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 
 const Issue = require("../models/Issue");
 const Patient = require("../models/Patient");
@@ -11,30 +12,193 @@ const MedicalItem = require("../models/MedicalItem");
 ================================= */
 
 router.post("/", async (req, res) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
 
-        const { receiptNo, reference, patient, items, totalDeposit } = req.body;
+        const { receiptNo, reference, remarks, patient, items, renewDate } = req.body;
 
-        const newIssue = new Issue({
+        let totalDeposit = 0;
+
+        for (const i of items) {
+
+            const item = await MedicalItem.findById(i.item).session(session);
+
+            if (!item) {
+                throw new Error("Item not found");
+            }
+
+            if (item.totalStock < i.qty) {
+                throw new Error(`Not enough stock for ${item.itemName}`);
+            }
+
+            await MedicalItem.findByIdAndUpdate(
+                i.item,
+                { $inc: { totalStock: -i.qty } },
+                { session }
+            );
+
+            totalDeposit += item.depositPerItem * i.qty;
+
+        }
+
+        const issue = await Issue.create([{
             receiptNo,
             reference,
+            remarks,
             patient,
             items,
-            totalDeposit,
-            isReturned: false
-        });
+            renewDate,
+            totalDeposit
+        }], { session });
 
-        await newIssue.save();
+        await session.commitTransaction();
+        session.endSession();
 
-        res.json({
-            message: "Issue created successfully",
-            data: newIssue
-        });
+        res.json(issue[0]);
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to create issue" });
+
+        await session.abortTransaction();
+        session.endSession();
+
+        console.log(err);
+        res.status(500).json({ message: err.message });
+
     }
+
+});
+
+
+/* ===============================
+   UPDATE ISSUE
+================================= */
+
+router.put("/:id", async (req, res) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+
+        const issue = await Issue.findById(req.params.id).session(session);
+
+        if (!issue) {
+            throw new Error("Issue not found");
+        }
+
+        /* restore old stock */
+
+        for (const i of issue.items) {
+
+            await MedicalItem.findByIdAndUpdate(
+                i.item,
+                { $inc: { totalStock: i.qty } },
+                { session }
+            );
+
+        }
+
+        /* deduct new stock */
+
+        let totalDeposit = 0;
+
+        for (const i of req.body.items) {
+
+            const item = await MedicalItem.findById(i.item).session(session);
+
+            if (!item) {
+                throw new Error("Item not found");
+            }
+
+            if (item.totalStock < i.qty) {
+                throw new Error(`Not enough stock for ${item.itemName}`);
+            }
+
+            await MedicalItem.findByIdAndUpdate(
+                i.item,
+                { $inc: { totalStock: -i.qty } },
+                { session }
+            );
+
+            totalDeposit += item.depositPerItem * i.qty;
+
+        }
+
+        issue.items = req.body.items;
+        issue.remarks = req.body.remarks;
+        issue.reference = req.body.reference;
+        issue.renewDate = req.body.renewDate;
+        issue.totalDeposit = totalDeposit;
+
+        await issue.save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.json(issue);
+
+    } catch (err) {
+
+        await session.abortTransaction();
+        session.endSession();
+
+        console.error(err);
+        res.status(500).json({ message: err.message });
+
+    }
+
+});
+
+
+/* ===============================
+   DELETE ISSUE
+================================= */
+
+router.delete("/:id", async (req, res) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+
+        const issue = await Issue.findById(req.params.id).session(session);
+
+        if (!issue) {
+            throw new Error("Issue not found");
+        }
+
+        /* restore stock */
+
+        for (const i of issue.items) {
+
+            await MedicalItem.findByIdAndUpdate(
+                i.item,
+                { $inc: { totalStock: i.qty } },
+                { session }
+            );
+
+        }
+
+        await issue.deleteOne({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.json({ message: "Issue deleted successfully" });
+
+    } catch (err) {
+
+        await session.abortTransaction();
+        session.endSession();
+
+        console.error(err);
+        res.status(500).json({ message: err.message });
+
+    }
+
 });
 
 
@@ -43,6 +207,7 @@ router.post("/", async (req, res) => {
 ================================= */
 
 router.get("/", async (req, res) => {
+
     try {
 
         const issues = await Issue.find()
@@ -56,9 +221,12 @@ router.get("/", async (req, res) => {
         res.json(issues);
 
     } catch (err) {
+
         console.error(err);
         res.status(500).json({ message: "Failed to fetch issues" });
+
     }
+
 });
 
 
@@ -67,6 +235,7 @@ router.get("/", async (req, res) => {
 ================================= */
 
 router.get("/active", async (req, res) => {
+
     try {
 
         const issues = await Issue.find({ isReturned: false })
@@ -80,9 +249,12 @@ router.get("/active", async (req, res) => {
         res.json(issues);
 
     } catch (err) {
+
         console.error(err);
         res.status(500).json({ message: "Failed to fetch active issues" });
+
     }
+
 });
 
 
@@ -91,18 +263,41 @@ router.get("/active", async (req, res) => {
 ================================= */
 
 router.put("/return/:id", async (req, res) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
 
-        const issue = await Issue.findById(req.params.id);
+        const issue = await Issue.findById(req.params.id).session(session);
 
         if (!issue) {
-            return res.status(404).json({ message: "Issue not found" });
+            throw new Error("Issue not found");
+        }
+
+        if (issue.isReturned) {
+            throw new Error("Item already returned");
+        }
+
+        /* restore stock */
+
+        for (const i of issue.items) {
+
+            await MedicalItem.findByIdAndUpdate(
+                i.item,
+                { $inc: { totalStock: i.qty } },
+                { session }
+            );
+
         }
 
         issue.isReturned = true;
         issue.returnedAt = new Date();
 
-        await issue.save();
+        await issue.save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
 
         res.json({
             message: "Item returned successfully",
@@ -110,9 +305,16 @@ router.put("/return/:id", async (req, res) => {
         });
 
     } catch (err) {
+
+        await session.abortTransaction();
+        session.endSession();
+
         console.error(err);
-        res.status(500).json({ message: "Return failed" });
+        res.status(500).json({ message: err.message });
+
     }
+
 });
+
 
 module.exports = router;

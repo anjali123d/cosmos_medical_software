@@ -1,34 +1,176 @@
+/* ===========================
+   PAGE LAYOUT
+=========================== */
+
 .return-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 0px;
+    padding: 1.5rem;
+    max-width: 1100px;
+    margin: auto;
 }
 
 .return-grid {
     display: grid;
-    grid-template-columns: 450px 1fr;
+    grid-template-columns: 420px 1fr;
     gap: 2rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
 }
 
+@media (max-width: 900px) {
+    .return-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ===========================
+   CARD DESIGN
+=========================== */
+
+.card {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ===========================
+   HEADER
+=========================== */
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.7rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+
+/* ===========================
+   FORM
+=========================== */
+
+.input-field {
+    margin-bottom: 1.3rem;
+}
+
+.input-field label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+
+select,
+input[type="number"] {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: 0.2s;
+}
+
+select:focus,
+input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+
+/* ===========================
+   CONFIRM BUTTON
+=========================== */
+
+.confirm-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+}
+
+.confirm-btn:disabled {
+    background: #94a3b8;
+}
+
+
+/* ===========================
+   ISSUE DETAIL CARD
+=========================== */
+
+.detail-card {
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 16px;
+    position: sticky;
+    top: 1.5rem;
+    border: 1px solid #030508;
+}
+
+.detail-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 1.2rem;
+}
+
+.detail-row label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+}
+
+.detail-row p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+
+/* ===========================
+   SETTLEMENT BOX
+=========================== */
+
 .settlement-box {
-    background: #fff;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    background-image: linear-gradient(to bottom, #f8fafc, #fff);
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.2rem;
+    margin-top: 1.2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .settlement-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.8rem;
+    margin-bottom: 8px;
     color: #475569;
+    font-size: 0.9rem;
 }
 
 .deduction {
-    color: #e11d48;
+    color: #ef4444;
     font-weight: 600;
 }
 
@@ -36,143 +178,41 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 2px solid #e2e8f0;
-    padding-top: 1rem;
-    margin-top: 0.5rem;
+    border-top: 2px dashed #e2e8f0;
+    padding-top: 12px;
+    margin-top: 10px;
 }
 
-/* HIGH HIGHLIGHT FOR REFUND */
+
+/* ===========================
+   REFUND HIGHLIGHT
+=========================== */
+
 .refund-value {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 800;
     color: #10b981;
-    /* Emerald Green */
-    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    text-shadow: 0 3px 6px rgba(16, 185, 129, 0.15);
 }
 
-.confirm-btn {
-    width: 100%;
-    background: #1e293b;
-    color: white;
-    padding: 16px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
-}
 
-.confirm-btn:hover:not(:disabled) {
-    background: #0f172a;
-    transform: translateY(-2px);
-}
-
-.detail-card {
-    background: #f1f5f9;
-    padding: 0rem;
-    border-radius: 20px;
-    position: sticky;
-    top: 2rem;
-}
-
-.detail-row {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 1.5rem;
-    align-items: flex-start;
-}
-
-.detail-row label {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #64748b;
-    letter-spacing: 0.05em;
-}
-
-.detail-row p {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0;
-}
-
-.return-container {
-    padding: 0rem;
-    max-width: 800px;
-    margin: 0 0;
-}
-
-.card {
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-}
-
-.page-header {
-    margin-bottom: 2rem;
-}
-
-.page-header h1 {
-    font-size: 1.8rem;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
-}
-
-.page-header p {
-    color: #64748b;
-}
-
-.input-field {
-    margin-bottom: 1.5rem;
-}
-
-.input-field label {
-    display: block;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-}
-
-select,
-input[type="number"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.submit-btn {
-    width: 100%;
-    background: #3b82f6;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.submit-btn:disabled {
-    background: #94a3b8;
-}
+/* ===========================
+   ALERTS
+=========================== */
 
 .alert {
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     margin-bottom: 1rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .error-alert {
     background: #fee2e2;
-    color: #991b1b;
+    color: #b91c1c;
 }
 
 .success-alert {
@@ -180,17 +220,22 @@ input[type="number"] {
     color: #065f46;
 }
 
+
+/* ===========================
+   SUGGESTION BOX
+=========================== */
+
 .suggestion-box {
     position: absolute;
     width: 100%;
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-top: 4px;
-    max-height: 250px;
+    max-height: 240px;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
 .suggestion-item {
@@ -205,11 +250,11 @@ input[type="number"] {
 
 .suggestion-main {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 .suggestion-sub {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #64748b;
 }
 
@@ -217,6 +262,11 @@ input[type="number"] {
     color: #94a3b8;
     cursor: default;
 }
+
+
+/* ===========================
+   RETURN HISTORY
+=========================== */
 
 .return-history-list {
     display: flex;
@@ -227,31 +277,37 @@ input[type="number"] {
 
 .return-history-card {
     background: white;
-    padding: 5px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(0, 0, 0, 0.432);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #03091157;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: 0.2s;
+}
+
+.return-history-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .history-row {
     display: flex;
     justify-content: space-between;
     margin: 4px 0;
-    font-size: 14px;
+    font-size: 0.85rem;
 }
 
 .label {
     font-weight: 600;
-    color: #555;
+    color: #475569;
 }
 
 .refund {
-    color: #2e7d32;
-    font-weight: bold;
+    color: #16a34a;
+    font-weight: 700;
 }
 
 .no-history {
     text-align: center;
     padding: 20px;
-    color: #777;
+    color: #94a3b8;
 }

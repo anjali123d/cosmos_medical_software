@@ -2,14 +2,21 @@ const mongoose = require("mongoose");
 
 const IssueSchema = new mongoose.Schema(
     {
-        receiptNo: String,
 
+        receiptNo: {
+            type: String,
+            required: true,
+            unique: true
+        },
         reference: String,
+        remarks: String,
 
         patient: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Patient"
         },
+
+        renewDate: Date,
 
         items: [
             {
@@ -17,9 +24,12 @@ const IssueSchema = new mongoose.Schema(
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "MedicalItem"
                 },
-                qty: {
+
+                qty: Number,
+
+                returnedQty: {
                     type: Number,
-                    default: 1
+                    default: 0
                 }
             }
         ],

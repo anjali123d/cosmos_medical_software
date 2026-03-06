@@ -24,35 +24,51 @@ router.post("/", async (req, res) => {
         );
 
         if (!issueItem) {
-            return res.status(404).json({ message: "Item not found in issue" });
+            return res.status(404).json({ message: "Item not in issue" });
         }
 
-        if (qty > issueItem.qty) {
-            return res.status(400).json({ message: "Invalid quantity" });
+        const remaining = issueItem.qty - issueItem.returnedQty;
+
+        if (qty > remaining) {
+            return res.status(400).json({ message: "Return qty exceeds" });
         }
 
-        const medicalItem = await MedicalItem.findById(itemId);
+        issueItem.returnedQty += qty;
 
-        medicalItem.totalStock += qty;
-        await medicalItem.save();
+        const item = await MedicalItem.findById(itemId);
 
-        issueItem.qty -= qty;
+        item.totalStock += qty;
 
-        await issue.save();
+        await item.save();
 
-        const refundAmount = issue.totalDeposit - damageCharge;
+        const refundAmount = (item.depositPerItem * qty) - damageCharge;
 
-        const newReturn = await Return.create({
+        await Return.create({
             issue: issueId,
+            itemId,
+            qty,
             damageCharge,
             refundAmount
         });
 
-        res.json(newReturn);
+        /* check full return */
+
+        const allReturned = issue.items.every(
+            i => i.qty === i.returnedQty
+        );
+
+        if (allReturned) {
+            issue.isReturned = true;
+            issue.returnedAt = new Date();
+        }
+
+        await issue.save();
+
+        res.json({ message: "Return success" });
 
     } catch (err) {
 
-        console.error(err);
+        console.log(err);
         res.status(500).json({ message: "Return failed" });
 
     }
@@ -63,58 +79,90 @@ router.post("/", async (req, res) => {
 ================================ */
 router.get("/history", async (req, res) => {
     try {
+
         const returns = await Return.find()
             .populate({
                 path: "issue",
-                populate: ["patient", "items"]
+                populate: [
+                    { path: "patient" },
+                    { path: "items.item" }
+                ]
             })
+            .populate("itemId")
             .sort({ createdAt: -1 });
 
         res.json(returns);
 
     } catch (err) {
+
         console.error(err);
         res.status(500).json({ message: "Failed to fetch returns" });
+
     }
 });
+
 
 /* ===============================
    GET : All Returns
 ================================ */
 router.get("/", async (req, res) => {
+
     try {
+
         const returns = await Return.find()
             .populate({
                 path: "issue",
-                populate: ["patient", "items"]
+                populate: [
+                    { path: "patient" },
+                    { path: "items.item" }
+                ]
             })
+            .populate("itemId")
             .sort({ createdAt: -1 });
 
         res.json(returns);
+
     } catch (err) {
+
+        console.error(err);
         res.status(500).json({ message: "Failed to fetch returns" });
+
     }
+
 });
+
 
 /* ===============================
    GET : Single Return
 ================================ */
 router.get("/:id", async (req, res) => {
+
     try {
+
         const returnItem = await Return.findById(req.params.id)
             .populate({
                 path: "issue",
-                populate: ["patient", "items"]
-            });
+                populate: [
+                    { path: "patient" },
+                    { path: "items.item" }
+                ]
+            })
+            .populate("itemId");
 
         if (!returnItem) {
             return res.status(404).json({ message: "Return not found" });
         }
 
         res.json(returnItem);
+
     } catch (err) {
+
+        console.error(err);
         res.status(500).json({ message: "Failed to fetch return" });
+
     }
+
 });
+
 
 module.exports = router;
