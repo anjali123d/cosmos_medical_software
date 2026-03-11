@@ -18,9 +18,7 @@ router.post("/", async (req, res) => {
 
     try {
 
-        const { receiptNo, reference, remarks, patient, items, renewDate } = req.body;
-
-        let totalDeposit = 0;
+        const { receiptNo, reference, remarks, patient, items, renewDate, totalDeposit } = req.body;
 
         for (const i of items) {
 
@@ -39,8 +37,6 @@ router.post("/", async (req, res) => {
                 { $inc: { totalStock: -i.qty } },
                 { session }
             );
-
-            totalDeposit += item.depositPerItem * i.qty;
 
         }
 
@@ -70,7 +66,6 @@ router.post("/", async (req, res) => {
     }
 
 });
-
 
 /* ===============================
    UPDATE ISSUE
@@ -103,8 +98,6 @@ router.put("/:id", async (req, res) => {
 
         /* deduct new stock */
 
-        let totalDeposit = 0;
-
         for (const i of req.body.items) {
 
             const item = await MedicalItem.findById(i.item).session(session);
@@ -123,15 +116,15 @@ router.put("/:id", async (req, res) => {
                 { session }
             );
 
-            totalDeposit += item.depositPerItem * i.qty;
-
         }
 
         issue.items = req.body.items;
         issue.remarks = req.body.remarks;
         issue.reference = req.body.reference;
         issue.renewDate = req.body.renewDate;
-        issue.totalDeposit = totalDeposit;
+
+        // save manual / auto deposit from frontend
+        issue.totalDeposit = req.body.totalDeposit;
 
         await issue.save({ session });
 
