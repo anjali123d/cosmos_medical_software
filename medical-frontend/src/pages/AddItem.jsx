@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import API from "../api";
 import "./AddItem.css";
 import {
-    Plus, Edit2, Trash2, Package,
-    ArrowLeft, CheckCircle, AlertCircle, X
-} from 'react-feather';
-import { useNavigate } from "react-router-dom";
+    Plus, Edit2, Trash2, Package, X
+} from "react-feather";
 
 const AddItem = () => {
-    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         itemName: "",
         totalStock: "",
@@ -20,6 +18,11 @@ const AddItem = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [showForm, setShowForm] = useState(false);
+
+    /* =========================
+       FETCH ITEMS
+    ========================= */
 
     const fetchItems = async () => {
         try {
@@ -34,55 +37,84 @@ const AddItem = () => {
         fetchItems();
     }, []);
 
+    /* =========================
+       FORM CHANGE
+    ========================= */
+
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
     const resetForm = () => {
-        setForm({ itemName: "", totalStock: "", depositPerItem: "" });
+        setForm({
+            itemName: "",
+            totalStock: "",
+            depositPerItem: ""
+        });
         setEditingId(null);
         setError("");
     };
 
+    /* =========================
+       SUBMIT
+    ========================= */
+
     const handleSubmit = async (e) => {
+
         e.preventDefault();
+
         setError("");
         setSuccess("");
 
         if (!form.itemName || !form.totalStock || !form.depositPerItem) {
-            setError("Please fill in all medical item details");
+            setError("Please fill all fields");
             return;
         }
 
         try {
+
             setLoading(true);
+
+            const payload = {
+                itemName: form.itemName,
+                totalStock: Number(form.totalStock),
+                depositPerItem: Number(form.depositPerItem)
+            };
+
             if (editingId) {
-                await API.put(`/items/${editingId}`, {
-                    itemName: form.itemName,
-                    totalStock: Number(form.totalStock),
-                    depositPerItem: Number(form.depositPerItem)
-                });
-                setSuccess("Item updated successfully!");
-                setShowForm(false);
+
+                await API.put(`/items/${editingId}`, payload);
+                setSuccess("Item updated successfully");
+
             } else {
-                await API.post("/items", {
-                    itemName: form.itemName,
-                    totalStock: Number(form.totalStock),
-                    depositPerItem: Number(form.depositPerItem)
-                });
-                setSuccess("New item added to inventory!");
+
+                await API.post("/items", payload);
+                setSuccess("Item added successfully");
+
             }
 
-            setTimeout(() => setSuccess(""), 3000);
-            resetForm();
             fetchItems();
+            resetForm();
+            setShowForm(false);
+
+            setTimeout(() => setSuccess(""), 3000);
+
         } catch {
-            setError("Operation failed. Check server connection.");
+
+            setError("Operation failed. Check server.");
+
         } finally {
+
             setLoading(false);
+
         }
+
     };
-    const [showForm, setShowForm] = useState(false);
+
+    /* =========================
+       EDIT
+    ========================= */
+
     const handleEdit = (item) => {
 
         setForm({
@@ -92,23 +124,37 @@ const AddItem = () => {
         });
 
         setEditingId(item._id);
-
-        setShowForm(true); // modal open
+        setShowForm(true);
 
     };
+
+    /* =========================
+       DELETE
+    ========================= */
+
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+        if (!window.confirm("Delete this item?")) return;
+
         try {
+
             await API.delete(`/items/${id}`);
             fetchItems();
 
         } catch {
-            setError("Could not delete item.");
+
+            setError("Delete failed");
+
         }
+
     };
 
     return (
+
         <div className="add-item-container">
+
+            {/* ADD / EDIT MODAL */}
+
             {showForm && (
 
                 <div className="modal-overlay">
@@ -117,7 +163,7 @@ const AddItem = () => {
 
                         <div className="modal-header">
 
-                            <h3>{editingId ? "Edit Item" : "Add New Item"}</h3>
+                            <h3>{editingId ? "Edit Item" : "Add Item"}</h3>
 
                             <button
                                 className="close-btn"
@@ -189,21 +235,16 @@ const AddItem = () => {
                         </form>
 
                     </div>
+
                 </div>
 
             )}
-            {/* Header Area */}
+
+            {/* PAGE HEADER */}
+
             <div className="page-header">
-                <div className="header-left">
-                    <div>
-                        <h1>Inventory Management</h1>
 
-                    </div>
-                </div>
-            </div>
-
-            <div className="content-layout">
-                {/* Left Side: Form */}
+                <h1>Inventory Management</h1>
 
                 <button
                     className="add-btn"
@@ -214,77 +255,94 @@ const AddItem = () => {
                 >
                     <Plus size={16} /> Add Item
                 </button>
-                {/* Right Side: List - Card Based Layout */}
-                <div className="list-section">
-                    <div className="glass-card">
-                        <div className="list-header">
-                            <h3>Current Inventory</h3>
 
-                        </div>
-
-                        <div className="items-grid">
-                            {items.map((item) => (
-                                <div
-                                    key={item._id}
-                                    className={`item-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
-                                >
-                                    <div className="item-card-header">
-                                        <div className="item-title">
-                                            <div className="item-icon">
-                                                <Package size={18} />
-                                            </div>
-                                            <h4>{item.itemName}</h4>
-                                        </div>
-                                        <div className="item-actions">
-                                            <button
-                                                className="icon-btn edit"
-                                                onClick={() => handleEdit(item)}
-                                                aria-label="Edit item"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                className="icon-btn delete"
-                                                onClick={() => handleDelete(item._id)}
-                                                aria-label="Delete item"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="item-details">
-                                        <div className="detail-row">
-                                            <span className="detail-label">Stock Quantity:</span>
-                                            <span className={`detail-value stock-value ${item.totalStock <= 5 ? "low" : ""}`}>
-                                                {item.totalStock} units
-                                            </span>
-                                        </div>
-                                        <div className="detail-row">
-                                            <span className="detail-label">Deposit Amount:</span>
-                                            <span className="detail-value deposit-value">
-                                                ₹{item.depositPerItem}
-                                            </span>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                            ))}
-
-                            {items.length === 0 && (
-                                <div className="empty-state">
-                                    <Package size={48} />
-                                    <p>No medical items found in records.</p>
-                                </div>
-                            )}
-
-                        </div>
-                    </div>
-                </div>
             </div>
+
+            {/* ITEM LIST */}
+
+            <div className="items-grid">
+
+                {items.map((item) => (
+
+                    <div
+                        key={item._id}
+                        className={`item-card ${item.totalStock <= 5 ? "low-stock" : ""}`}
+                    >
+
+                        <div className="item-card-header">
+
+                            <div className="item-title">
+
+                                <Package size={18} />
+
+                                <h4>{item.itemName}</h4>
+
+                            </div>
+
+                            <div className="item-actions">
+
+                                <button
+                                    className="icon-btn edit"
+                                    onClick={() => handleEdit(item)}
+                                >
+                                    <Edit2 size={16} />
+                                </button>
+
+                                <button
+                                    className="icon-btn delete"
+                                    onClick={() => handleDelete(item._id)}
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div className="item-details">
+
+                            <div className="detail-row">
+
+                                <span>Stock</span>
+
+                                <span className={item.totalStock <= 5 ? "low" : ""}>
+                                    {item.totalStock}
+                                </span>
+
+                            </div>
+
+                            <div className="detail-row">
+
+                                <span>Deposit</span>
+
+                                <span>₹{item.depositPerItem}</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                ))}
+
+                {items.length === 0 && (
+
+                    <div className="empty-state">
+
+                        <Package size={48} />
+
+                        <p>No items found</p>
+
+                    </div>
+
+                )}
+
+            </div>
+
         </div>
+
     );
+
 };
 
 export default AddItem;

@@ -30,13 +30,21 @@ const ReturnItem = () => {
     ====================== */
 
     const fetchIssues = async () => {
-        const res = await API.get("/issues/active");
-        setIssues(res.data);
+        try {
+            const res = await API.get("/issues/active");
+            setIssues(res.data);
+        } catch {
+            setError("Failed to load issues");
+        }
     };
 
     const fetchReturns = async () => {
-        const res = await API.get("/returns");
-        setReturns(res.data);
+        try {
+            const res = await API.get("/returns");
+            setReturns(res.data);
+        } catch {
+            setError("Failed to load return history");
+        }
     };
 
     useEffect(() => {
@@ -51,14 +59,9 @@ const ReturnItem = () => {
     useEffect(() => {
 
         const handleClickOutside = (event) => {
-
-            if (
-                wrapperRef.current &&
-                !wrapperRef.current.contains(event.target)
-            ) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
                 setShowSuggestions(false);
             }
-
         };
 
         document.addEventListener("mousedown", handleClickOutside);
@@ -121,18 +124,21 @@ const ReturnItem = () => {
         );
 
         if (!selectedItem) {
-            setError("Item not found in issue");
+            setError("Item not found");
             return;
         }
 
         const remaining =
             selectedItem.qty - (selectedItem.returnedQty || 0);
 
-        if (Number(form.qty) > remaining) {
-
-            setError(`Max return allowed: ${remaining}`);
+        if (remaining <= 0) {
+            setError("All items already returned");
             return;
+        }
 
+        if (Number(form.qty) > remaining) {
+            setError(`Maximum return allowed: ${remaining} `);
+            return;
         }
 
         try {
@@ -142,14 +148,19 @@ const ReturnItem = () => {
             const res = await API.post("/returns", {
 
                 issueId: form.issueId,
-                itemId: form.itemId,
-                qty: Number(form.qty),
-                damageCharge: Number(form.damageCharge)
+
+                items: [
+                    {
+                        itemId: form.itemId,
+                        qty: Number(form.qty),
+                        damageCharge: Number(form.damageCharge)
+                    }
+                ]
 
             });
 
-            fetchReturns();
-            fetchIssues();
+            await fetchReturns();
+            await fetchIssues();
 
             setForm({
                 issueId: "",
@@ -161,9 +172,9 @@ const ReturnItem = () => {
             setSelectedIssue(null);
             setSearchTerm("");
 
-            setSuccess(
-                `Item returned successfully. Refund: ₹${Math.max(res.data.refundAmount, 0)}`
-            );
+            const refund = res.data?.data?.totalRefund || 0;
+
+            setSuccess(`Return successful.Refund: ₹${refund} `);
 
             setTimeout(() => setSuccess(""), 4000);
 
@@ -198,21 +209,16 @@ const ReturnItem = () => {
                 <h1>Item Return</h1>
             </header>
 
-            {/* RETURN FORM */}
-
             <div className="card">
 
                 <h2>Return Medical Item</h2>
 
                 <form onSubmit={handleSubmit}>
 
-                    {/* PATIENT SEARCH */}
-
                     <div className="input-field" ref={wrapperRef}>
 
                         <label>
-                            <Search size={14} />
-                            Search Patient
+                            <Search size={14} /> Search Patient
                         </label>
 
                         <input
@@ -225,34 +231,31 @@ const ReturnItem = () => {
                             }}
                         />
 
-                        {showSuggestions &&
-                            filteredIssues.length > 0 && (
+                        {showSuggestions && filteredIssues.length > 0 && (
 
-                                <div className="suggestion-box">
+                            <div className="suggestion-box">
 
-                                    {filteredIssues.map(issue => (
+                                {filteredIssues.map(issue => (
 
-                                        <div
-                                            key={issue._id}
-                                            className="suggestion-item"
-                                            onClick={() =>
-                                                handleSelectIssue(issue)
-                                            }
-                                        >
+                                    <div
+                                        key={issue._id}
+                                        className="suggestion-item"
+                                        onClick={() => handleSelectIssue(issue)}
+                                    >
 
-                                            {issue.patient?.patientName}
+                                        {issue.patient?.patientName}
+                                        {" "}
+                                        (Receipt: {issue.receiptNo})
 
-                                        </div>
+                                    </div>
 
-                                    ))}
+                                ))}
 
-                                </div>
+                            </div>
 
-                            )}
+                        )}
 
                     </div>
-
-                    {/* ITEM SELECT */}
 
                     <div className="input-field">
 
@@ -269,32 +272,30 @@ const ReturnItem = () => {
                             disabled={!selectedIssue}
                         >
 
-                            <option value="">
-                                Select Item
-                            </option>
+                            <option value="">Select Item</option>
 
-                            {selectedIssue?.items.map(i => (
+                            {selectedIssue?.items
+                                .filter(i => (i.qty - (i.returnedQty || 0)) > 0)
+                                .map(i => (
 
-                                <option
-                                    key={i.item._id}
-                                    value={i.item._id}
-                                >
+                                    <option
+                                        key={i.item._id}
+                                        value={i.item._id}
+                                    >
 
-                                    {i.item.itemName}
-                                    {" "}
-                                    (Remaining:
-                                    {" "}
-                                    {i.qty - (i.returnedQty || 0)})
+                                        {i.item.itemName}
+                                        {" "}
+                                        (Remaining:
+                                        {" "}
+                                        {i.qty - (i.returnedQty || 0)})
 
-                                </option>
+                                    </option>
 
-                            ))}
+                                ))}
 
                         </select>
 
                     </div>
-
-                    {/* RETURN QTY */}
 
                     <div className="input-field">
 
@@ -315,8 +316,6 @@ const ReturnItem = () => {
 
                     </div>
 
-                    {/* DAMAGE */}
-
                     <div className="input-field">
 
                         <label>Damage Charge (₹)</label>
@@ -329,9 +328,7 @@ const ReturnItem = () => {
                                 setForm({
                                     ...form,
                                     damageCharge:
-                                        parseInt(
-                                            e.target.value
-                                        ) || 0
+                                        parseInt(e.target.value) || 0
                                 })
                             }
                         />
@@ -353,11 +350,7 @@ const ReturnItem = () => {
                     {error && (
 
                         <div className="alert error-alert">
-
-                            <AlertCircle size={16} />
-                            {" "}
-                            {error}
-
+                            <AlertCircle size={16} /> {error}
                         </div>
 
                     )}
@@ -365,11 +358,7 @@ const ReturnItem = () => {
                     {success && (
 
                         <div className="alert success-alert">
-
-                            <CheckCircle size={16} />
-                            {" "}
-                            {success}
-
+                            <CheckCircle size={16} /> {success}
                         </div>
 
                     )}
@@ -388,50 +377,54 @@ const ReturnItem = () => {
 
                     {returns.map(r => (
 
-                        <div
-                            key={r._id}
-                            className="return-history-card"
-                        >
+                        r.items.map((item, index) => (
 
-                            <div>
-                                <strong>Patient:</strong>
-                                {" "}
-                                {r.issue?.patient?.patientName}
+                            <div
+                                key={index}
+                                className="return-history-card"
+                            >
+
+                                <div>
+                                    <strong>Patient:</strong>
+                                    {" "}
+                                    {r.issue?.patient?.patientName}
+                                </div>
+
+                                <div>
+                                    <strong>Item:</strong>
+                                    {" "}
+                                    {item.itemName}
+                                </div>
+
+                                <div>
+                                    <strong>Qty:</strong>
+                                    {" "}
+                                    {item.qty}
+                                </div>
+
+                                <div>
+                                    <strong>Damage:</strong>
+                                    {" "}
+                                    ₹{item.damageCharge}
+                                </div>
+
+                                <div>
+                                    <strong>Refund:</strong>
+                                    {" "}
+                                    ₹{item.refundAmount}
+                                </div>
+
+                                <div>
+                                    <strong>Date:</strong>
+                                    {" "}
+                                    {new Date(
+                                        r.createdAt
+                                    ).toLocaleDateString()}
+                                </div>
+
                             </div>
 
-                            <div>
-                                <strong>Item:</strong>
-                                {" "}
-                                {r.itemId?.itemName}
-                            </div>
-
-                            <div>
-                                <strong>Qty:</strong>
-                                {" "}
-                                {r.qty}
-                            </div>
-
-                            <div>
-                                <strong>Damage:</strong>
-                                {" "}
-                                ₹{r.damageCharge}
-                            </div>
-
-                            <div>
-                                <strong>Refund:</strong>
-                                {" "}
-                                ₹{r.refundAmount}
-                            </div>
-
-                            <div>
-                                <strong>Date:</strong>
-                                {" "}
-                                {new Date(
-                                    r.createdAt
-                                ).toLocaleDateString()}
-                            </div>
-
-                        </div>
+                        ))
 
                     ))}
 
@@ -446,3 +439,4 @@ const ReturnItem = () => {
 };
 
 export default ReturnItem;
+

@@ -5,10 +5,11 @@ const mongoose = require("mongoose");
 const Issue = require("../models/Issue");
 const Patient = require("../models/Patient");
 const MedicalItem = require("../models/MedicalItem");
+const Return = require("../models/Return");
 
 
 /* ===============================
-   CREATE NEW ISSUE
+   CREATE ISSUE
 ================================= */
 
 router.post("/", async (req, res) => {
@@ -20,13 +21,14 @@ router.post("/", async (req, res) => {
 
         const { receiptNo, reference, remarks, patient, items, renewDate, totalDeposit } = req.body;
 
+        let processedItems = [];
+        let totalAmount = 0;
+
         for (const i of items) {
 
             const item = await MedicalItem.findById(i.item).session(session);
 
-            if (!item) {
-                throw new Error("Item not found");
-            }
+            if (!item) throw new Error("Item not found");
 
             if (item.totalStock < i.qty) {
                 throw new Error(`Not enough stock for ${item.itemName}`);
@@ -38,6 +40,20 @@ router.post("/", async (req, res) => {
                 { session }
             );
 
+            const price = item.depositPerItem || 0;
+            const amount = price * i.qty;
+
+            processedItems.push({
+                item: item._id,
+                itemName: item.itemName,
+                qty: i.qty,
+                price: price,
+                deposit: price,
+                amount: amount,
+                returnedQty: 0
+            });
+
+            totalAmount += amount;
         }
 
         const issue = await Issue.create([{
@@ -45,8 +61,9 @@ router.post("/", async (req, res) => {
             reference,
             remarks,
             patient,
-            items,
             renewDate,
+            items: processedItems,
+            totalAmount,
             totalDeposit
         }], { session });
 
@@ -60,12 +77,12 @@ router.post("/", async (req, res) => {
         await session.abortTransaction();
         session.endSession();
 
-        console.log(err);
         res.status(500).json({ message: err.message });
 
     }
 
 });
+
 
 /* ===============================
    UPDATE ISSUE
@@ -80,11 +97,9 @@ router.put("/:id", async (req, res) => {
 
         const issue = await Issue.findById(req.params.id).session(session);
 
-        if (!issue) {
-            throw new Error("Issue not found");
-        }
+        if (!issue) throw new Error("Issue not found");
 
-        /* restore old stock */
+        /* restore previous stock */
 
         for (const i of issue.items) {
 
@@ -96,15 +111,14 @@ router.put("/:id", async (req, res) => {
 
         }
 
-        /* deduct new stock */
+        let processedItems = [];
+        let totalAmount = 0;
 
         for (const i of req.body.items) {
 
             const item = await MedicalItem.findById(i.item).session(session);
 
-            if (!item) {
-                throw new Error("Item not found");
-            }
+            if (!item) throw new Error("Item not found");
 
             if (item.totalStock < i.qty) {
                 throw new Error(`Not enough stock for ${item.itemName}`);
@@ -116,14 +130,29 @@ router.put("/:id", async (req, res) => {
                 { session }
             );
 
+            const price = item.depositPerItem || 0;
+            const amount = price * i.qty;
+
+            processedItems.push({
+                item: item._id,
+                itemName: item.itemName,
+                qty: i.qty,
+                price: price,
+                deposit: price,
+                amount: amount,
+                returnedQty: 0
+            });
+
+            totalAmount += amount;
+
         }
 
-        issue.items = req.body.items;
-        issue.remarks = req.body.remarks;
-        issue.reference = req.body.reference;
-        issue.renewDate = req.body.renewDate;
+        issue.items = processedItems;
+        issue.totalAmount = totalAmount;
 
-        // save manual / auto deposit from frontend
+        issue.reference = req.body.reference;
+        issue.remarks = req.body.remarks;
+        issue.renewDate = req.body.renewDate;
         issue.totalDeposit = req.body.totalDeposit;
 
         await issue.save({ session });
@@ -138,7 +167,6 @@ router.put("/:id", async (req, res) => {
         await session.abortTransaction();
         session.endSession();
 
-        console.error(err);
         res.status(500).json({ message: err.message });
 
     }
@@ -159,11 +187,7 @@ router.delete("/:id", async (req, res) => {
 
         const issue = await Issue.findById(req.params.id).session(session);
 
-        if (!issue) {
-            throw new Error("Issue not found");
-        }
-
-        /* restore stock */
+        if (!issue) throw new Error("Issue not found");
 
         for (const i of issue.items) {
 
@@ -187,7 +211,6 @@ router.delete("/:id", async (req, res) => {
         await session.abortTransaction();
         session.endSession();
 
-        console.error(err);
         res.status(500).json({ message: err.message });
 
     }
@@ -205,17 +228,13 @@ router.get("/", async (req, res) => {
 
         const issues = await Issue.find()
             .populate("patient")
-            .populate({
-                path: "items.item",
-                model: "MedicalItem"
-            })
+            .populate("items.item")
             .sort({ createdAt: -1 });
 
         res.json(issues);
 
     } catch (err) {
 
-        console.error(err);
         res.status(500).json({ message: "Failed to fetch issues" });
 
     }
@@ -233,17 +252,13 @@ router.get("/active", async (req, res) => {
 
         const issues = await Issue.find({ isReturned: false })
             .populate("patient")
-            .populate({
-                path: "items.item",
-                model: "MedicalItem"
-            })
+            .populate("items.item")
             .sort({ createdAt: -1 });
 
         res.json(issues);
 
     } catch (err) {
 
-        console.error(err);
         res.status(500).json({ message: "Failed to fetch active issues" });
 
     }
@@ -252,49 +267,93 @@ router.get("/active", async (req, res) => {
 
 
 /* ===============================
-   RETURN ISSUE
+   RETURN ITEMS
 ================================= */
 
-router.put("/return/:id", async (req, res) => {
+router.post("/return", async (req, res) => {
 
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
 
-        const issue = await Issue.findById(req.params.id).session(session);
+        const { issueId, items } = req.body;
 
-        if (!issue) {
-            throw new Error("Issue not found");
-        }
+        const issue = await Issue.findById(issueId).session(session);
 
-        if (issue.isReturned) {
-            throw new Error("Item already returned");
-        }
+        if (!issue) throw new Error("Issue not found");
 
-        /* restore stock */
+        let totalRefund = 0;
+        let totalDamageCharge = 0;
 
-        for (const i of issue.items) {
+        const returnItems = [];
+
+        for (const r of items) {
+
+            const issueItem = issue.items.find(
+                i => i.item.toString() === r.itemId
+            );
+
+            if (!issueItem) throw new Error("Item not part of this issue");
+
+            const remainingQty = issueItem.qty - issueItem.returnedQty;
+
+            if (r.qty > remainingQty) {
+                throw new Error("Return qty exceeds remaining qty");
+            }
+
+            const refund =
+                (issueItem.deposit * r.qty) - (r.damageCharge || 0);
+
+            issueItem.returnedQty += r.qty;
 
             await MedicalItem.findByIdAndUpdate(
-                i.item,
-                { $inc: { totalStock: i.qty } },
+                r.itemId,
+                { $inc: { totalStock: r.qty } },
                 { session }
             );
 
+            totalRefund += refund;
+            totalDamageCharge += r.damageCharge || 0;
+
+            returnItems.push({
+                itemId: r.itemId,
+                itemName: issueItem.itemName,
+                qty: r.qty,
+                depositPerItem: issueItem.deposit,
+                damageCharge: r.damageCharge || 0,
+                refundAmount: refund
+            });
+
         }
 
-        issue.isReturned = true;
-        issue.returnedAt = new Date();
+        const allReturned = issue.items.every(
+            i => i.qty === i.returnedQty
+        );
+
+        if (allReturned) {
+
+            issue.isReturned = true;
+            issue.returnedAt = new Date();
+
+        }
 
         await issue.save({ session });
+
+        const returnDoc = await Return.create([{
+            issue: issueId,
+            patient: issue.patient,
+            items: returnItems,
+            totalRefund,
+            totalDamageCharge
+        }], { session });
 
         await session.commitTransaction();
         session.endSession();
 
         res.json({
-            message: "Item returned successfully",
-            data: issue
+            message: "Items returned successfully",
+            data: returnDoc[0]
         });
 
     } catch (err) {
@@ -302,12 +361,10 @@ router.put("/return/:id", async (req, res) => {
         await session.abortTransaction();
         session.endSession();
 
-        console.error(err);
         res.status(500).json({ message: err.message });
 
     }
 
 });
-
 
 module.exports = router;
