@@ -451,10 +451,7 @@ const IssueItem = () => {
                         <Package size={48} />
                         <h3>No Issues Found</h3>
                         <p>Get started by creating a new issue</p>
-                        <button className="primary-btn" onClick={() => setShowForm(true)}>
-                            <Plus size={18} />
-                            <span>Create Issue</span>
-                        </button>
+
                     </div>
                 ) : (
                     filteredIssues.map((issue) => (
