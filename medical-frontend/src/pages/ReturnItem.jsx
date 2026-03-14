@@ -54,7 +54,7 @@ const IssueItem = () => {
 
     const [filterStatus, setFilterStatus] = useState("all"); // all, active, returned, partially
     const [showFilters, setShowFilters] = useState(false);
-    const [viewMode, setViewMode] = useState("cards"); // cards or table
+    // const [viewMode, setViewMode] = useState("cards"); // cards or table
     const [activeTab, setActiveTab] = useState("issues"); // issues or returns
 
     // Return form state
@@ -125,7 +125,7 @@ const IssueItem = () => {
             setReturns(normalizedReturns);
 
         } catch (err) {
-            setError("Failed to fetch data");
+            setError("Failed to fetch data" + err);
         } finally {
             setLoading(false);
         }
@@ -245,7 +245,7 @@ const IssueItem = () => {
             }
 
             setSuccess(editingId ? "Issue updated successfully" : "Issue created successfully");
-            resetForm();
+
             setShowForm(false);
             fetchAllData();
             setTimeout(() => setSuccess(""), 3000);
@@ -276,15 +276,7 @@ const IssueItem = () => {
         setShowForm(true);
     };
 
-    const handleDelete = async (issue) => {
-        if (!window.confirm("Delete this issue?")) return;
-        try {
-            await API.delete(`/issues/${issue._id}`);
-            fetchAllData();
-        } catch {
-            setError("Could not delete issue");
-        }
-    };
+
 
     const handleReturnClick = (issue) => {
         setSelectedIssue(issue);
@@ -358,7 +350,7 @@ const IssueItem = () => {
             fetchAllData();
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
-            setError("Return failed");
+            setError("Return failed"+err);
         } finally {
             setLoading(false);
         }
