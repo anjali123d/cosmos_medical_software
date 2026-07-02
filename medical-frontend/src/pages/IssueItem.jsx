@@ -53,6 +53,7 @@ const IssueItem = () => {
     const initialForm = {
         receiptNo: "",
         reference: "",
+        samirSirReference: false,
         remarks: "",
         patientName: "",
         mobile: "",
@@ -183,6 +184,7 @@ const IssueItem = () => {
             const issueData = {
                 receiptNo: form.receiptNo,
                 reference: form.reference,
+                samirSirReference: form.samirSirReference,
                 remarks: form.remarks,
                 patient: patientId,
                 items: form.selectedItems.map(i => ({
@@ -220,6 +222,7 @@ const IssueItem = () => {
             patientName: issue.patient?.patientName || "",
             mobile: issue.patient?.mobile || "",
             address: issue.patient?.address || "",
+            samirSirReference: issue.samirSirReference || false,
             renewDate: issue.renewDate ? issue.renewDate.split("T")[0] : "",
             selectedItems: issue.items.map(i => ({
                 itemId: i.item._id,
@@ -484,6 +487,13 @@ const IssueItem = () => {
                                         <Calendar size={16} />
                                         <span>Issued: {new Date(issue.createdAt).toLocaleDateString()}</span>
                                     </div>
+                                    {issue.samirSirReference && (
+                                        <div className="info-row">
+                                            <span className="badge badge-success">
+                                                Samir Sir Reference
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="items-section">
@@ -664,7 +674,22 @@ const IssueItem = () => {
                                                 />
                                             </div>
                                         </div>
-
+                                        {/* Samir Sir Reference */}
+                                        <div className="form-field">
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={form.samirSirReference}
+                                                    onChange={(e) =>
+                                                        setForm({
+                                                            ...form,
+                                                            samirSirReference: e.target.checked
+                                                        })
+                                                    }
+                                                />
+                                                <span style={{ marginLeft: "8px" }}>Samir Sir Reference</span>
+                                            </label>
+                                        </div>
                                         <div className="form-field">
                                             <label>Remarks</label>
                                             <div className="input-with-icon">

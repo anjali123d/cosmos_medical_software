@@ -19,7 +19,16 @@ router.post("/", async (req, res) => {
 
     try {
 
-        const { receiptNo, reference, remarks, patient, items, renewDate, totalDeposit } = req.body;
+        const {
+            receiptNo,
+            reference,
+            samirSirReference,
+            remarks,
+            patient,
+            items,
+            renewDate,
+            totalDeposit
+        } = req.body;
 
         let processedItems = [];
         let totalAmount = 0;
@@ -59,6 +68,7 @@ router.post("/", async (req, res) => {
         const issue = await Issue.create([{
             receiptNo,
             reference,
+            samirSirReference,
             remarks,
             patient,
             renewDate,
@@ -66,7 +76,6 @@ router.post("/", async (req, res) => {
             totalAmount,
             totalDeposit
         }], { session });
-
         await session.commitTransaction();
         session.endSession();
 
@@ -154,7 +163,7 @@ router.put("/:id", async (req, res) => {
         issue.remarks = req.body.remarks;
         issue.renewDate = req.body.renewDate;
         issue.totalDeposit = req.body.totalDeposit;
-
+        issue.samirSirReference = req.body.samirSirReference;
         await issue.save({ session });
 
         await session.commitTransaction();

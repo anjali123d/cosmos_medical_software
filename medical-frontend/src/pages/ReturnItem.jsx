@@ -54,6 +54,7 @@ const IssueItem = () => {
 
     const [filterStatus, setFilterStatus] = useState("all"); // all, active, returned, partially
     const [showFilters, setShowFilters] = useState(false);
+    const [samirFilter, setSamirFilter] = useState("all"); // all, yes, no
     // const [viewMode, setViewMode] = useState("cards"); // cards or table
     const [activeTab, setActiveTab] = useState("issues"); // issues or returns
 
@@ -350,7 +351,7 @@ const IssueItem = () => {
             fetchAllData();
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
-            setError("Return failed"+err);
+            setError("Return failed" + err);
         } finally {
             setLoading(false);
         }
@@ -384,7 +385,14 @@ const IssueItem = () => {
                 if (!partiallyReturned) return false;
             }
         }
+        // Samir Sir Reference Filter
+        if (samirFilter === "yes" && !issue.samirSirReference) {
+            return false;
+        }
 
+        if (samirFilter === "no" && issue.samirSirReference) {
+            return false;
+        }
         if (historySearch) {
             const patientMatch = issue.patient?.patientName
                 ?.toLowerCase()
@@ -607,6 +615,32 @@ const IssueItem = () => {
                                     value={historySearch}
                                     onChange={(e) => setHistorySearch(e.target.value)}
                                 />
+                            </div>
+                        </div>
+                        <div className="filter-group">
+                            <label>Samir Sir Reference</label>
+
+                            <div className="status-filters">
+                                <button
+                                    className={`status-btn ${samirFilter === "all" ? "active" : ""}`}
+                                    onClick={() => setSamirFilter("all")}
+                                >
+                                    All
+                                </button>
+
+                                <button
+                                    className={`status-btn ${samirFilter === "yes" ? "active" : ""}`}
+                                    onClick={() => setSamirFilter("yes")}
+                                >
+                                    Yes
+                                </button>
+
+                                <button
+                                    className={`status-btn ${samirFilter === "no" ? "active" : ""}`}
+                                    onClick={() => setSamirFilter("no")}
+                                >
+                                    No
+                                </button>
                             </div>
                         </div>
                     </div>

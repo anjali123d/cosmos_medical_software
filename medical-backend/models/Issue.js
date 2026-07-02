@@ -45,6 +45,10 @@ const IssueSchema = new mongoose.Schema(
     },
 
     reference: String,
+   samirSirReference: {
+        type: Boolean,
+        default: false
+    },
 
     remarks: String,
 
