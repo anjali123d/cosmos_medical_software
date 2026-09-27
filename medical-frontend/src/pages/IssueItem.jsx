@@ -55,6 +55,14 @@ const IssueItem = () => {
         patientName: "",
         mobile: "",
         address: "",
+
+        /*
+         * Issue Date
+         *
+         * New issue will automatically use today's date.
+         */
+        issueDate: new Date().toISOString().split("T")[0],
+
         renewDate: "",
         selectedItems: [],
         totalDeposit: 0
@@ -63,7 +71,16 @@ const IssueItem = () => {
     const [form, setForm] = useState(initialForm);
 
     const resetForm = () => {
-        setForm(initialForm);
+        setForm({
+            ...initialForm,
+
+            /*
+             * Always reset Issue Date to today's date
+             * when creating a new issue.
+             */
+            issueDate: new Date().toISOString().split("T")[0]
+        });
+
         setManualDeposit(false);
         setEditingId(null);
         setSearchTerm("");
@@ -245,6 +262,7 @@ const IssueItem = () => {
         }
 
         try {
+
             setLoading(true);
 
             let existingPatient = patients.find(
@@ -282,6 +300,16 @@ const IssueItem = () => {
                 samirSirReference: form.samirSirReference,
                 remarks: form.remarks,
                 patient: patientId,
+
+                /*
+                 * Issue Date
+                 *
+                 * Selected date is sent to backend.
+                 * If somehow empty, current date is used.
+                 */
+                issueDate: form.issueDate
+                    ? new Date(form.issueDate)
+                    : new Date(),
 
                 items: form.selectedItems.map(i => ({
                     item: i.itemId,
@@ -344,6 +372,24 @@ const IssueItem = () => {
             receiptNo: issue.receiptNo || "",
             reference: issue.reference || "",
             remarks: issue.remarks || "",
+
+            /*
+             * Issue Date
+             *
+             * New records:
+             *     issueDate
+             *
+             * Old records:
+             *     createdAt
+             *
+             * This keeps old Issue records working.
+             */
+            issueDate:
+                issue.issueDate
+                    ? issue.issueDate.split("T")[0]
+                    : issue.createdAt
+                        ? issue.createdAt.split("T")[0]
+                        : new Date().toISOString().split("T")[0],
 
             patientName:
                 issue.patient?.patientName || "",
@@ -472,22 +518,78 @@ const IssueItem = () => {
     };
 
     /*
+     * Get Issue Date
+     *
+     * IMPORTANT:
+     *
+     * 1. New Issue records use issueDate.
+     * 2. Old Issue records may not have issueDate.
+     * 3. Old records will use createdAt as fallback.
+     * 4. Invalid dates are ignored.
+     *
+     * Existing logic is not removed.
+     */
+    const getIssueDate = (issue) => {
+
+        if (issue.issueDate) {
+
+            const issueDate =
+                new Date(issue.issueDate);
+
+            if (
+                !Number.isNaN(
+                    issueDate.getTime()
+                )
+            ) {
+                return issueDate;
+            }
+        }
+
+        /*
+         * Backward compatibility for old data
+         */
+        if (issue.createdAt) {
+
+            const createdAt =
+                new Date(issue.createdAt);
+
+            if (
+                !Number.isNaN(
+                    createdAt.getTime()
+                )
+            ) {
+                return createdAt;
+            }
+        }
+
+        return null;
+    };
+
+    /*
      * Filter Issues
      *
      * IMPORTANT:
-     * createdAt is replaced with issueDate because
-     * timestamps are no longer used in Issue schema.
+     *
+     * New data:
+     * issueDate
+     *
+     * Old data:
+     * createdAt
+     *
+     * Existing status and search filtering remains unchanged.
      */
     const filteredIssues = issues.filter(issue => {
 
-        const issueDate = new Date(issue.issueDate);
+        const issueDate =
+            getIssueDate(issue);
 
         /*
          * Start date
          */
         if (startDate) {
 
-            const start = new Date(startDate);
+            const start =
+                new Date(startDate);
 
             start.setHours(
                 0,
@@ -496,7 +598,10 @@ const IssueItem = () => {
                 0
             );
 
-            if (issueDate < start) {
+            if (
+                !issueDate ||
+                issueDate < start
+            ) {
                 return false;
             }
         }
@@ -508,7 +613,8 @@ const IssueItem = () => {
          */
         if (endDate) {
 
-            const end = new Date(endDate);
+            const end =
+                new Date(endDate);
 
             end.setHours(
                 23,
@@ -517,7 +623,10 @@ const IssueItem = () => {
                 999
             );
 
-            if (issueDate > end) {
+            if (
+                !issueDate ||
+                issueDate > end
+            ) {
                 return false;
             }
         }
@@ -566,7 +675,10 @@ const IssueItem = () => {
                         .includes(search)
                 );
 
-            if (!patientMatch && !itemMatch) {
+            if (
+                !patientMatch &&
+                !itemMatch
+            ) {
                 return false;
             }
         }
@@ -824,8 +936,8 @@ const IssueItem = () => {
 
                                 <button
                                     className={`status-btn ${filterStatus === "all"
-                                            ? "active"
-                                            : ""
+                                        ? "active"
+                                        : ""
                                         }`}
                                     onClick={() =>
                                         setFilterStatus("all")
@@ -836,8 +948,8 @@ const IssueItem = () => {
 
                                 <button
                                     className={`status-btn ${filterStatus === "active"
-                                            ? "active"
-                                            : ""
+                                        ? "active"
+                                        : ""
                                         }`}
                                     onClick={() =>
                                         setFilterStatus("active")
@@ -848,8 +960,8 @@ const IssueItem = () => {
 
                                 <button
                                     className={`status-btn ${filterStatus === "returned"
-                                            ? "active"
-                                            : ""
+                                        ? "active"
+                                        : ""
                                         }`}
                                     onClick={() =>
                                         setFilterStatus("returned")
@@ -922,8 +1034,8 @@ const IssueItem = () => {
                         <div
                             key={issue._id}
                             className={`issue-card ${issue.isReturned
-                                    ? "returned"
-                                    : "active"
+                                ? "returned"
+                                : "active"
                                 }`}
                         >
 
@@ -942,8 +1054,8 @@ const IssueItem = () => {
 
                                 <span
                                     className={`status-badge ${issue.isReturned
-                                            ? "returned"
-                                            : "active"
+                                        ? "returned"
+                                        : "active"
                                         }`}
                                 >
                                     {issue.isReturned
@@ -991,8 +1103,9 @@ const IssueItem = () => {
                                     </div>
 
 
-                                    {/* CHANGED:
-                                        createdAt → issueDate
+                                    {/* Issue Date
+                                        New records → issueDate
+                                        Old records → createdAt
                                     */}
 
                                     <div className="info-row">
@@ -1001,11 +1114,18 @@ const IssueItem = () => {
 
                                         <span>
                                             Issued:{" "}
-                                            {issue.issueDate
-                                                ? new Date(
-                                                    issue.issueDate
-                                                ).toLocaleDateString()
-                                                : "-"}
+
+                                            {(() => {
+
+                                                const issueDate =
+                                                    getIssueDate(issue);
+
+                                                return issueDate
+                                                    ? issueDate.toLocaleDateString()
+                                                    : "-";
+
+                                            })()}
+
                                         </span>
 
                                     </div>
@@ -1123,9 +1243,11 @@ const IssueItem = () => {
 
                                         <span>
                                             Renew Date:{" "}
+
                                             {new Date(
                                                 issue.renewDate
                                             ).toLocaleDateString()}
+
                                         </span>
 
                                     </div>
@@ -1283,6 +1405,7 @@ const IssueItem = () => {
                                                         setShowSuggestions(
                                                             true
                                                         );
+
                                                     }}
                                                     placeholder="Enter patient name"
                                                 />
@@ -1424,6 +1547,38 @@ const IssueItem = () => {
                                                         })
                                                     }
                                                     placeholder="Enter receipt number"
+                                                />
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {/* Issue Date */}
+
+                                        <div className="form-field">
+
+                                            <label>
+                                                Issue Date *
+                                            </label>
+
+                                            <div className="input-with-icon">
+
+                                                <Calendar size={16} />
+
+                                                <input
+                                                    type="date"
+                                                    value={
+                                                        form.issueDate || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        setForm({
+                                                            ...form,
+                                                            issueDate:
+                                                                e.target.value
+                                                        })
+                                                    }
+                                                    required
                                                 />
 
                                             </div>
