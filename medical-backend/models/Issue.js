@@ -1,91 +1,114 @@
 const mongoose = require("mongoose");
 
-const IssueItemSchema = new mongoose.Schema({
-    
-    item: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "MedicalItem",
-        required: true
+const IssueItemSchema = new mongoose.Schema(
+    {
+        item: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "MedicalItem",
+            required: true
+        },
+
+        // Store item name at the time of issue
+        itemName: {
+            type: String,
+            required: true
+        },
+
+        qty: {
+            type: Number,
+            required: true
+        },
+
+        price: {
+            type: Number,
+            required: true
+        },
+
+        deposit: {
+            type: Number,
+            default: 0
+        },
+
+        amount: {
+            type: Number,
+            default: 0
+        },
+
+        returnedQty: {
+            type: Number,
+            default: 0
+        }
     },
-
-    itemName: String, // snapshot for history
-
-    qty: {
-        type: Number,
-        required: true
-    },
-
-    price: {
-        type: Number,
-        required: true
-    },
-
-    deposit: {
-        type: Number,
-        default: 0
-    },
-
-    amount: {
-        type: Number
-    },
-
-    returnedQty: {
-        type: Number,
-        default: 0
-    }
-
-});
+    { _id: true }
+);
 
 const IssueSchema = new mongoose.Schema(
-{
-    receiptNo: {
-        type: String,
-        required: true,
-        unique: true
-    },
+    {
+        receiptNo: {
+            type: String,
+            required: true,
+            unique: true
+        },
 
-    reference: String,
-   samirSirReference: {
-        type: Boolean,
-        default: false
-    },
+        reference: {
+            type: String,
+            default: ""
+        },
 
-    remarks: String,
+        samirSirReference: {
+            type: Boolean,
+            default: false
+        },
 
-    patient: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
-        required: true
-    },
+        remarks: {
+            type: String,
+            default: ""
+        },
 
-    issueDate: {
-        type: Date,
-        default: Date.now
-    },
+        patient: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Patient",
+            required: true
+        },
 
-    renewDate: Date,
+        // Actual date when items were issued
+        issueDate: {
+            type: Date,
+            default: Date.now
+        },
 
-    items: [IssueItemSchema],
+        // Date for renewal, if applicable
+        renewDate: {
+            type: Date,
+            default: null
+        },
 
-    totalAmount: {
-        type: Number,
-        default: 0
-    },
+        items: {
+            type: [IssueItemSchema],
+            required: true
+        },
 
-    totalDeposit: {
-        type: Number,
-        default: 0
-    },
+        totalAmount: {
+            type: Number,
+            default: 0
+        },
 
-    isReturned: {
-        type: Boolean,
-        default: false
-    },
+        totalDeposit: {
+            type: Number,
+            default: 0
+        },
 
-    returnedAt: Date
+        isReturned: {
+            type: Boolean,
+            default: false
+        },
 
-},
-{ timestamps: true }
+        // Actual date when the issue was completely returned
+        returnedAt: {
+            type: Date,
+            default: null
+        }
+    }
 );
 
 module.exports = mongoose.model("Issue", IssueSchema);

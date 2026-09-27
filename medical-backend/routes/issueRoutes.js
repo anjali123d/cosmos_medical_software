@@ -76,6 +76,7 @@ router.post("/", async (req, res) => {
             totalAmount,
             totalDeposit
         }], { session });
+
         await session.commitTransaction();
         session.endSession();
 
@@ -164,6 +165,7 @@ router.put("/:id", async (req, res) => {
         issue.renewDate = req.body.renewDate;
         issue.totalDeposit = req.body.totalDeposit;
         issue.samirSirReference = req.body.samirSirReference;
+
         await issue.save({ session });
 
         await session.commitTransaction();
@@ -238,7 +240,7 @@ router.get("/", async (req, res) => {
         const issues = await Issue.find()
             .populate("patient")
             .populate("items.item")
-            .sort({ createdAt: -1 });
+            .sort({ issueDate: -1 });
 
         res.json(issues);
 
@@ -262,7 +264,7 @@ router.get("/active", async (req, res) => {
         const issues = await Issue.find({ isReturned: false })
             .populate("patient")
             .populate("items.item")
-            .sort({ createdAt: -1 });
+            .sort({ issueDate: -1 });
 
         res.json(issues);
 
